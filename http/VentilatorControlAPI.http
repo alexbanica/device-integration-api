@@ -1,0 +1,27 @@
+### Start Ventilator
+POST {{host}}/api/ventilator/start
+Accept: application/json
+
+###
+
+### Stop Ventilator
+POST {{host}}/api/ventilator/stop
+Accept: application/json
+
+###
+
+### Set Ventilator Speed
+PUT {{host}}/api/ventilator/speed/3
+Accept: application/json
+
+### Set Ventilator Speed
+POST {{host}}/api/ventilator/rotate
+Accept: application/json
+
+# Notes:
+# Replace '1' in the URL with the desired speed (1, 2, or 3).
+# 1 = Low speed, 2 = Medium speed, 3 = High speed.
+
+### Get the state
+GET {{host}}/api/ventilator/state
+Accept: application/json

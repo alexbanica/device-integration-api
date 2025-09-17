@@ -1,0 +1,48 @@
+{
+  "name": "device_integration_api",
+  "version": "1.0.0",
+  "description": "A Node.js server project written in TypeScript",
+  "main": "dist/device_integration_api.js",
+  "scripts": {
+    "start": "node dist/device_integration_api.js",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn src/device_integration_api.ts",
+    "lint": "eslint 'src/**/*.{js,ts}' --fix",
+    "format": "prettier --write 'src/**/*.{js,ts}'",
+    "watch": "tsc --watch & nodemon dist/device_integration_api.js"
+  },
+  "author": "Alex. Banica",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "@types/express": "latest",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.49.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 80
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "semi": ["error", "always"],
+      "quotes": ["error", "single"]
+    }
+  }
+}
