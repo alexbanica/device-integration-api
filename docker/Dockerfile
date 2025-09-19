@@ -36,15 +36,15 @@ RUN --mount=type=secret,id=GITHUB_AUTH \
     \
     unzip src.zip -d /tmp && \
     mv /tmp/alexbanica-* /tmp/src && \
-    rm src.zip 
+    rm src.zip
 
-FROM arm32v6/node:BASE_BUILD_IMAGE_VERSION AS builder
+FROM node:BASE_BUILD_IMAGE_VERSION AS builder
 WORKDIR /app
 COPY --from=downloader /tmp/src ./
 RUN npm install
 RUN npm run build
 
-FROM arm32v6/node:BASE_IMAGE_VERSION AS runtime
+FROM node:BASE_IMAGE_VERSION AS runtime
 
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
