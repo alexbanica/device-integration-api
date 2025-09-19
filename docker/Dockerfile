@@ -38,9 +38,10 @@ RUN --mount=type=secret,id=GITHUB_AUTH \
     mv /tmp/alexbanica-* /tmp/src && \
     rm src.zip
 
-FROM --platform=linux/arm64 node:BASE_BUILD_IMAGE_VERSION AS builder
+FROM node:BASE_BUILD_IMAGE_VERSION AS builder
 WORKDIR /app
 COPY --from=downloader /tmp/src ./
+
 RUN npm install --production --silent nodemon
 RUN npm run build
 

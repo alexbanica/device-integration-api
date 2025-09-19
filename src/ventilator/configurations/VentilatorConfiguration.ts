@@ -15,11 +15,11 @@ class VentilatorConfiguration {
   private readonly _ventilatorSpeedCommand: string;
 
   constructor(env: Dict<string>) {
-    this._ventilatorWorkingDirectory = env.VENTILATOR_WORKING_DIRECTORY || '';
-    this._ventilatorStartCommand = env.VENTILATOR_START_COMMAND || '';
-    this._ventilatorStopCommand = env.VENTILATOR_STOP_COMMAND || '';
-    this._ventilatorRotateCommand = env.VENTILATOR_ROTATE_COMMAND || '';
-    this._ventilatorSpeedCommand = env.VENTILATOR_SPEED_COMMAND || '';
+    this._ventilatorWorkingDirectory = env.VENTILATOR_SCRIPT_DIR || '';
+    this._ventilatorStartCommand = env.VENTILATOR_BASH_START || '';
+    this._ventilatorStopCommand = env.VENTILATOR_BASH_STOP || '';
+    this._ventilatorRotateCommand = env.VENTILATOR_BASH_ROTATE || '';
+    this._ventilatorSpeedCommand = env.VENTILATOR_BASH_SPEED || '';
     this.validateConfiguration();
   }
 
