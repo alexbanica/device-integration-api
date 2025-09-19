@@ -50,7 +50,7 @@ FROM node:BASE_IMAGE_VERSION AS runtime
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY package*.json ./
+COPY --from=builder /app/package*.json ./
 
 # Install Python3 and pip for runtime environment
 RUN apk add --no-cache python3 py3-pip && \
@@ -67,5 +67,4 @@ RUN chmod +x /usr/bin/pigpiod
 EXPOSE 3000
 
 ENV NODE_ENV=production
-
-ENTRYPOINT ["sh", "-c", "pigpiod && npm start"]
+ENTRYPOINT ["sh", "-c", "su && pigpiod && npm start"]
