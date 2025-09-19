@@ -4,8 +4,9 @@
   "description": "A Node.js server project written in TypeScript",
   "main": "dist/device_integration_api.js",
   "scripts": {
+    "postinstall": "npm install typescript",
     "start": "node dist/device_integration_api.js",
-    "build": "tsc",
+    "build": "npm install && npx tsc && tsc",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
     "lint": "eslint 'src/**/*.{js,ts}' --fix",
     "format": "prettier --write 'src/**/*.{js,ts}'",

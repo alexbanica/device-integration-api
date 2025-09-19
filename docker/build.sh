@@ -5,6 +5,10 @@ PUSH_OPTION=""
 FORCE_OPTION=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --debug)
+      shift
+      DEBUG="--progress=plain"
+      ;;
     --platform)
       shift
       PLATFORMS="$1"
@@ -43,7 +47,7 @@ LATEST_TAG="${DOCKER_REGISTRY_URI}/device-integration-api:latest-node${BASE_IMAG
 export $(xargs < .env) && \
 sed -e "s/BASE_IMAGE_VERSION/${BASE_IMAGE_VERSION}/g" \
     -e "s/BASE_BUILD_IMAGE_VERSION/${BASE_BUILD_IMAGE_VERSION}/g" Dockerfile | \
-docker buildx build ${FORCE_OPTION} \
+docker buildx build ${DEBUG} ${FORCE_OPTION} \
   ${PLATFORMS:+--platform "$PLATFORMS"} \
   -t "${IMAGE_TAG}" \
   -t "${LATEST_TAG}" \
