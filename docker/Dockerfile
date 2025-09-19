@@ -24,7 +24,7 @@ ARG RELEASE_TAG
 # Install required tools
 RUN apk add --no-cache curl unzip
 
-# Download and extract WordPress
+# Download and extract
 RUN --mount=type=secret,id=GITHUB_AUTH \
     set -eux; \
     auth="$(cat /run/secrets/GITHUB_AUTH)"; \
