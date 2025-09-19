@@ -9,6 +9,7 @@
     "build": "npm install && npx tsc && tsc",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
     "lint": "eslint 'src/**/*.{js,ts}' --fix",
+    "clean": "rm -rf dist",
     "format": "prettier --write 'src/**/*.{js,ts}'",
     "watch": "tsc --watch & nodemon dist/device_integration_api.js"
   },
