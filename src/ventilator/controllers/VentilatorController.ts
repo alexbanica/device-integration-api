@@ -19,15 +19,21 @@ export class VentilatorController {
     });
 
     this.app.post('/api/ventilator/start', (req: Request, res: Response) => {
-      this.start().then(() => res.status(202).send());
+      this.start()
+        .then(() => res.status(202).send())
+        .catch((error) => res.status(500).send(error));
     });
 
     this.app.post('/api/ventilator/rotate', (req: Request, res: Response) => {
-      this.rotate().then(() => res.status(202).send());
+      this.rotate()
+        .then(() => res.status(202).send())
+        .catch((error) => res.status(500).send(error));
     });
 
     this.app.post('/api/ventilator/stop', (req: Request, res: Response) => {
-      this.stop().then(() => res.status(202).send());
+      this.stop()
+        .then(() => res.status(202).send())
+        .catch((error) => res.status(500).send(error));
     });
 
     this.app.put(
@@ -41,7 +47,9 @@ export class VentilatorController {
             .json({ error: 'Speed must be a number between 1 and 3.' });
         }
 
-        this.setSpeed(speed).then(() => res.status(202).send());
+        this.setSpeed(speed)
+          .then(() => res.status(202).send())
+          .catch((error) => res.status(500).send(error));
       },
     );
   }

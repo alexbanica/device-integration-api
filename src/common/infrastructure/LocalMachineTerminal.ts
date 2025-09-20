@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
+import path from 'node:path';
 
 const execPromise = promisify(exec);
 
@@ -18,6 +19,15 @@ export class LocalMachineTerminal {
       ) {
         console.error(`Invalid working directory: ${workingDirectory}`);
         return 1;
+      }
+      if (command.startsWith('./')) {
+        const scriptPath = path.resolve(workingDirectory, command.substring(2));
+        if (!fs.existsSync(scriptPath)) {
+          console.error(`Script not found: ${scriptPath}`);
+          return 1;
+        }
+        fs.chmodSync(scriptPath, '755');
+        command = scriptPath;
       }
 
       const { stdout, stderr } = await execPromise(command, {

@@ -27,7 +27,9 @@ export class VentilatorService {
       this._ventilatorState.speed = 1;
       this._ventilatorState.isRotating = false;
       console.log('Ventilator started. State:', this._ventilatorState);
+      return;
     }
+    throw new Error('Ventilator failed to start');
   }
 
   public async stop(): Promise<void> {
@@ -36,7 +38,9 @@ export class VentilatorService {
       this._ventilatorState.speed = 1;
       this._ventilatorState.isRotating = false;
       console.log('Ventilator stopped. State:', this._ventilatorState);
+      return;
     }
+    throw new Error('Ventilator failed to stop');
   }
 
   public async setSpeed(desiredSpeed: number): Promise<void> {
@@ -63,10 +67,12 @@ export class VentilatorService {
   }
 
   public async rotate(): Promise<void> {
-    if (
-      this._ventilatorState.isOn &&
-      (await this.ventilatorTerminal.rotate())
-    ) {
+    const isCommandExecuted = await this.ventilatorTerminal.rotate();
+    if (!isCommandExecuted) {
+      throw new Error('Ventilator failed to rotate');
+    }
+
+    if (this._ventilatorState.isOn && isCommandExecuted) {
       this._ventilatorState.isRotating = true;
       console.log('Ventilator rotating. State:', this._ventilatorState);
       return;
