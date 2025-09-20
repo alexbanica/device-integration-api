@@ -20,14 +20,14 @@ export class LocalMachineTerminal {
         console.error(`Invalid working directory: ${workingDirectory}`);
         return 1;
       }
-      if (command.startsWith('./')) {
-        const scriptPath = path.resolve(workingDirectory, command.substring(2));
+
+      const [script, ...args] = command.split(' ');
+      if (script.startsWith('./')) {
+        const scriptPath = path.resolve(workingDirectory, script.substring(2));
         if (!fs.existsSync(scriptPath)) {
           console.error(`Script not found: ${scriptPath}`);
           return 1;
         }
-        fs.chmodSync(scriptPath, '755');
-        command = scriptPath;
       }
 
       const { stdout, stderr } = await execPromise(command, {
