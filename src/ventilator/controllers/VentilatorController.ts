@@ -1,7 +1,7 @@
 import { Express, Request, Response } from 'express';
 import { VentilatorService } from '../services/VentilatorService';
 import { VentilatorStateDto } from '../dtos/VentilatorStateDto';
-import {ErrorResponse} from "../../common/controllers/responses/ErrorResponse";
+import { ErrorResponse } from '../../common/controllers/responses/ErrorResponse';
 
 export class VentilatorController {
   private readonly app: Express;
@@ -22,19 +22,25 @@ export class VentilatorController {
     this.app.post('/api/ventilator/start', (req: Request, res: Response) => {
       this.start()
         .then(() => res.status(202).send())
-        .catch((error) => res.status(500).send(new ErrorResponse(error.message)));
+        .catch((error) =>
+          res.status(500).send(new ErrorResponse(error.message)),
+        );
     });
 
     this.app.post('/api/ventilator/rotate', (req: Request, res: Response) => {
       this.rotate()
         .then(() => res.status(202).send())
-        .catch((error) => res.status(500).send(new ErrorResponse(error.message)));
+        .catch((error) =>
+          res.status(500).send(new ErrorResponse(error.message)),
+        );
     });
 
     this.app.post('/api/ventilator/stop', (req: Request, res: Response) => {
       this.stop()
         .then(() => res.status(202).send())
-        .catch((error) => res.status(500).send(new ErrorResponse(error.message)));
+        .catch((error) =>
+          res.status(500).send(new ErrorResponse(error.message)),
+        );
     });
 
     this.app.put(

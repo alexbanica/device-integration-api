@@ -22,6 +22,10 @@ export class VentilatorService {
   }
 
   public async start(): Promise<void> {
+    if (this._ventilatorState.isOn) {
+      console.log('Ventilator already started. State:', this._ventilatorState);
+      return;
+    }
     if (await this.ventilatorTerminal.start()) {
       this._ventilatorState.isOn = true;
       this._ventilatorState.speed = 1;
@@ -33,6 +37,10 @@ export class VentilatorService {
   }
 
   public async stop(): Promise<void> {
+    if (!this._ventilatorState.isOn) {
+      console.log('Ventilator already stopped. State:', this._ventilatorState);
+      return;
+    }
     if (await this.ventilatorTerminal.stop()) {
       this._ventilatorState.isOn = false;
       this._ventilatorState.speed = 1;
