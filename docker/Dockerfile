@@ -67,4 +67,4 @@ RUN chmod +x /usr/bin/pigpiod
 EXPOSE 3000
 
 ENV NODE_ENV=production
-ENTRYPOINT ["sh", "-c", "su && pigpiod &&  su node && npm start"]
+ENTRYPOINT ["sh", "-c", "npm start"]

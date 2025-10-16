@@ -5,7 +5,7 @@ export class VentilatorStateDto {
 
   public constructor() {
     this.isOn = false;
-    this.speed = 1;
+    this.speed = 0;
     this.isRotating = false;
   }
 }
