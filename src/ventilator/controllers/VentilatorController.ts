@@ -62,7 +62,7 @@ export class VentilatorController {
   }
 
   private async start(): Promise<void> {
-    await this.ventilatorService.toggle();
+    await this.ventilatorService.start();
   }
 
   private async rotate(): Promise<void> {
@@ -70,7 +70,7 @@ export class VentilatorController {
   }
 
   private async stop(): Promise<void> {
-    await this.ventilatorService.toggle();
+    await this.ventilatorService.stop();
   }
 
   private async setSpeed(speed: number): Promise<void> {
