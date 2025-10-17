@@ -43,7 +43,7 @@ export class VentilatorService {
     }
     if (await this.ventilatorTerminal.stop()) {
       this._ventilatorState.isOn = false;
-      this._ventilatorState.speed = 1;
+      this._ventilatorState.speed = 0;
       this._ventilatorState.isRotating = false;
       console.log('Ventilator stopped. State:', this._ventilatorState);
       return;

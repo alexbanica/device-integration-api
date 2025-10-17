@@ -48,10 +48,10 @@ export class VentilatorController {
       (req: Request, res: Response) => {
         const speed = parseInt(req.params.speed, 10);
 
-        if (isNaN(speed) || speed < 1 || speed > 3) {
+        if (isNaN(speed) || speed < 0 || speed > 3) {
           return res
             .status(400)
-            .json({ error: 'Speed must be a number between 1 and 3.' });
+            .json({ error: 'Speed must be a number between 0 and 3.' });
         }
 
         this.setSpeed(speed)
@@ -74,6 +74,10 @@ export class VentilatorController {
   }
 
   private async setSpeed(speed: number): Promise<void> {
+    if (speed === 0) {
+      await this.ventilatorService.stop();
+      return;
+    }
     await this.ventilatorService.setSpeed(speed);
   }
 
