@@ -18,10 +18,6 @@ Accept: application/json
 POST {{host}}/api/ventilator/rotate
 Accept: application/json
 
-# Notes:
-# Replace '1' in the URL with the desired speed (1, 2, or 3).
-# 1 = Low speed, 2 = Medium speed, 3 = High speed.
-
 ### Get the state
 GET {{host}}/api/ventilator/state
 Accept: application/json

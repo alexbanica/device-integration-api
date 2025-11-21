@@ -53,18 +53,23 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
 # Install Python3 and pip for runtime environment
-RUN apk add --no-cache python3 py3-pip && \
+RUN apk add --no-cache python3 py3-pip su-exec && \
     pip3 install pigpio
 
 # Copy pigpio binaries from the Debian build stage
 COPY --from=pigpio-builder /usr/local/bin/pigpiod /usr/bin/pigpiod
 COPY --from=pigpio-builder /usr/local/lib/libpigpio* /usr/lib/
 COPY --from=pigpio-builder /usr/local/include/pigpio.h /usr/include/
+COPY docker-entrypoint.sh /usr/local/bin/
 
 # Ensure necessary permissions for Pigpio
 RUN chmod +x /usr/bin/pigpiod
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3000
 
 ENV NODE_ENV=production
-ENTRYPOINT ["sh", "-c", "su && pigpiod &&  su node && npm start"]
+USER root
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["npm", "start"]
