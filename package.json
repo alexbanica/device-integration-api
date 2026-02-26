@@ -9,7 +9,7 @@
     "build:test": "tsc -p tsconfig.test.json",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
     "lint": "eslint '{src,tests}/**/*.{js,ts}' --fix",
-    "clean": "rm -rf dist dist-tests",
+    "clean": "rm -rf dist dist-tests node_modules",
     "format": "prettier --write '{src,tests}/**/*.{js,ts}'",
     "watch": "tsc --watch & nodemon dist/device_integration_api.js",
     "test": "npm run build:test && node --test dist-tests/tests"
