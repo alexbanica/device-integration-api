@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VentilatorService } from '../VentilatorService';
-import { VentilatorTerminalGatewayInterface } from '../../infrastructures/VentilatorTerminalGatewayInterface';
+import { VentilatorService } from '../../../src/ventilator/services/VentilatorService';
+import { VentilatorTerminalGatewayInterface } from '../../../src/ventilator/infrastructures/VentilatorTerminalGatewayInterface';
 
 class VentilatorTerminalGatewayStub implements VentilatorTerminalGatewayInterface {
   public startCalls = 0;

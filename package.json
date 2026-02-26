@@ -6,12 +6,13 @@
   "scripts": {
     "start": "node dist/device_integration_api.js",
     "build": "npm run clean && tsc",
+    "build:test": "tsc -p tsconfig.test.json",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
     "lint": "eslint 'src/**/*.{js,ts}' --fix",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist-tests",
     "format": "prettier --write 'src/**/*.{js,ts}'",
     "watch": "tsc --watch & nodemon dist/device_integration_api.js",
-    "test": "npm run build && node --test dist/**/*.test.js"
+    "test": "npm run build:test && node --test dist-tests/tests/**/*.test.js"
   },
   "author": "Alex. Banica",
   "license": "MIT",

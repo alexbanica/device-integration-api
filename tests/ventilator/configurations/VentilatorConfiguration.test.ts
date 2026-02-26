@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VentilatorConfiguration } from '../VentilatorConfiguration';
+import { VentilatorConfiguration } from '../../../src/ventilator/configurations/VentilatorConfiguration';
 
 test('creates ventilator configuration when all env vars are present', () => {
   const configuration = new VentilatorConfiguration({
