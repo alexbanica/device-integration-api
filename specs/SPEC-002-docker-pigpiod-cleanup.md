@@ -1,7 +1,7 @@
 # SPEC-002 - Docker Pigpiod Cleanup
 
 ## Status
-Draft - awaiting approval
+Approved
 
 ## Date
 2026-02-26
@@ -13,6 +13,7 @@ Simplify container runtime by removing in-container pigpio daemon build/install/
 - In scope:
   - Remove pigpio daemon compilation and binary copy from Docker image build.
   - Remove runtime startup logic for local `pigpiod` from container entrypoint.
+  - Remove Python + pigpio package install from runtime image.
   - Keep Node API process startup intact.
   - Keep container running on host network mode (operational assumption).
 - Out of scope:
@@ -28,10 +29,11 @@ Simplify container runtime by removing in-container pigpio daemon build/install/
 1. Image build
 - Docker build MUST NOT compile pigpio from source.
 - Docker build MUST NOT copy `pigpiod` binary/libraries into runtime image.
+- Docker build MUST NOT install Python or pigpio runtime dependencies.
 
 2. Container startup
 - Entrypoint MUST NOT attempt to start `pigpiod` in-container.
-- Entrypoint MUST continue to execute Node process command (`npm start`) as before.
+- Entrypoint MUST remain a minimal passthrough wrapper that executes the container command.
 
 3. Runtime connectivity contract
 - App runtime expects pigpio endpoint to be reachable at `localhost:8888` through host networking.
@@ -51,14 +53,10 @@ Simplify container runtime by removing in-container pigpio daemon build/install/
 - Deployment always uses host network mode for this service.
 - Host machine always runs pigpiod service bound to TCP `8888`.
 
-## Open Questions (Blocking Implementation)
-1. Should Python + `pip3 install pigpio` remain in runtime image, or be removed too?
-2. Should `docker/docker-entrypoint.sh` be removed entirely (switch to direct `CMD ["npm", "start"]`) or kept as a minimal passthrough wrapper?
-3. Should README/docker run example explicitly document `--network host` as mandatory?
-
 ## Acceptance Criteria
 - New spec branch created from `main`.
 - Spec file approved.
 - Dockerfile no longer contains pigpio builder stage/copy logic.
+- Dockerfile no longer installs Python/pigpio runtime dependencies.
 - Entrypoint no longer starts pigpiod.
 - Documentation updated to reflect host-network pigpiod dependency.

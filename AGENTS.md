@@ -13,4 +13,4 @@
 - Keep `README.md` and `AGENTS.md` updated when implementation constraints change.
 
 ## Active Spec
-- `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`)
+- `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`, status: Approved, date: 2026-02-26)
