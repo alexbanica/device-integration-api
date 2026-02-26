@@ -12,7 +12,7 @@
     "clean": "rm -rf dist dist-tests",
     "format": "prettier --write 'src/**/*.{js,ts}'",
     "watch": "tsc --watch & nodemon dist/device_integration_api.js",
-    "test": "npm run build:test && node --test dist-tests/tests/**/*.test.js"
+    "test": "npm run build:test && node --test dist-tests/tests"
   },
   "author": "Alex. Banica",
   "license": "MIT",
