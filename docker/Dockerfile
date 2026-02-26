@@ -20,7 +20,6 @@ FROM node:BASE_BUILD_IMAGE_VERSION AS builder
 WORKDIR /app
 COPY --from=downloader /tmp/src ./
 
-# Builder needs dev dependencies (e.g. typescript) to run npm build
 RUN npm install --silent
 RUN npm run build
 
