@@ -20,7 +20,8 @@ FROM node:BASE_BUILD_IMAGE_VERSION AS builder
 WORKDIR /app
 COPY --from=downloader /tmp/src ./
 
-RUN npm install --production --silent nodemon
+# Builder needs dev dependencies (e.g. typescript) to run npm build
+RUN npm install --silent
 RUN npm run build
 
 FROM node:BASE_IMAGE_VERSION AS runtime
