@@ -80,12 +80,14 @@ Key `npm` scripts included in this project:
    ./docker/build.sh --release <RELEASE_TAG>
    ```
 
-2. Run the Docker container:
+2. Ensure `pigpiod` is already running on the host and reachable on `localhost:8888`.
+
+3. Run the Docker container with host networking:
    ```bash
-   docker run -p 3000:3000 -d device-integration-api:<RELEASE_TAG>
+   docker run --network host -d device-integration-api:<RELEASE_TAG>
    ```
 
-3. Access the application in your browser:
+4. Access the application in your browser:
    ```
    http://localhost:3000
    ```

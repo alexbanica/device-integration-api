@@ -4,9 +4,8 @@
   "description": "A Node.js server project written in TypeScript",
   "main": "dist/device_integration_api.js",
   "scripts": {
-    "postinstall": "npm install typescript",
     "start": "node dist/device_integration_api.js",
-    "build": "npm install && npx tsc && tsc",
+    "build": "npm run clean && tsc",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
     "lint": "eslint 'src/**/*.{js,ts}' --fix",
     "clean": "rm -rf dist",
@@ -16,15 +15,15 @@
   "author": "Alex. Banica",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.5.9",
     "@types/express": "latest",
+    "@types/node": "^20.5.9",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^8.49.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
@@ -37,14 +36,22 @@
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint"],
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
     "rules": {
-      "semi": ["error", "always"],
-      "quotes": ["error", "single"]
+      "semi": [
+        "error",
+        "always"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ]
     }
   }
 }
