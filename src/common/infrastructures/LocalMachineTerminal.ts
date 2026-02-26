@@ -47,7 +47,8 @@ export class LocalMachineTerminal implements TerminalExecutorInterface {
       this.log('command_complete', { stdout, stderr });
       return 0;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'unknown_error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'unknown_error';
       this.log('command_failed', { error: errorMessage, command });
       return 1;
     }

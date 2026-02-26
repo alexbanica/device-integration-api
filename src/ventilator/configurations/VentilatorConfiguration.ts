@@ -19,19 +19,29 @@ export class VentilatorConfiguration {
 
   private validateConfiguration(): void {
     if (!this._ventilatorWorkingDirectory) {
-      throw new VentilatorConfigurationError('VENTILATOR_SCRIPT_DIR is required');
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_SCRIPT_DIR is required',
+      );
     }
     if (!this._ventilatorStartCommand) {
-      throw new VentilatorConfigurationError('VENTILATOR_BASH_START is required');
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_BASH_START is required',
+      );
     }
     if (!this._ventilatorStopCommand) {
-      throw new VentilatorConfigurationError('VENTILATOR_BASH_STOP is required');
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_BASH_STOP is required',
+      );
     }
     if (!this._ventilatorRotateCommand) {
-      throw new VentilatorConfigurationError('VENTILATOR_BASH_ROTATE is required');
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_BASH_ROTATE is required',
+      );
     }
     if (!this._ventilatorSpeedCommand) {
-      throw new VentilatorConfigurationError('VENTILATOR_BASH_SPEED is required');
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_BASH_SPEED is required',
+      );
     }
   }
 

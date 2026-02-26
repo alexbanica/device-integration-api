@@ -29,14 +29,17 @@ export class VentilatorController {
         );
     });
 
-    this.app.post('/api/v1/ventilator/rotate', (req: Request, res: Response) => {
-      this.ventilatorService
-        .rotate()
-        .then(() => res.status(202).send())
-        .catch((error: Error) =>
-          res.status(500).send(new ErrorResponse(error.message)),
-        );
-    });
+    this.app.post(
+      '/api/v1/ventilator/rotate',
+      (req: Request, res: Response) => {
+        this.ventilatorService
+          .rotate()
+          .then(() => res.status(202).send())
+          .catch((error: Error) =>
+            res.status(500).send(new ErrorResponse(error.message)),
+          );
+      },
+    );
 
     this.app.post('/api/v1/ventilator/stop', (req: Request, res: Response) => {
       this.ventilatorService
@@ -47,25 +50,28 @@ export class VentilatorController {
         );
     });
 
-    this.app.put('/api/v1/ventilator/speed/:speed', (req: Request, res: Response) => {
-      try {
-        const speedParameter = Array.isArray(req.params.speed)
-          ? req.params.speed[0]
-          : req.params.speed;
-        const speedRequest = SetVentilatorSpeedRequest.fromRouteParameter(
-          speedParameter,
-        );
+    this.app.put(
+      '/api/v1/ventilator/speed/:speed',
+      (req: Request, res: Response) => {
+        try {
+          const speedParameter = Array.isArray(req.params.speed)
+            ? req.params.speed[0]
+            : req.params.speed;
+          const speedRequest =
+            SetVentilatorSpeedRequest.fromRouteParameter(speedParameter);
 
-        this.ventilatorService
-          .setSpeed(speedRequest.speed)
-          .then(() => res.status(202).send())
-          .catch((error: Error) =>
-            res.status(500).send(new ErrorResponse(error.message)),
-          );
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Invalid request';
-        res.status(400).send(new ErrorResponse(message));
-      }
-    });
+          this.ventilatorService
+            .setSpeed(speedRequest.speed)
+            .then(() => res.status(202).send())
+            .catch((error: Error) =>
+              res.status(500).send(new ErrorResponse(error.message)),
+            );
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Invalid request';
+          res.status(400).send(new ErrorResponse(message));
+        }
+      },
+    );
   }
 }

@@ -2,9 +2,7 @@ import { VentilatorConfiguration } from '../configurations/VentilatorConfigurati
 import { TerminalExecutorInterface } from '../../common/infrastructures/TerminalExecutorInterface';
 import { VentilatorTerminalGatewayInterface } from './VentilatorTerminalGatewayInterface';
 
-export class VentilatorTerminalGateway
-  implements VentilatorTerminalGatewayInterface
-{
+export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInterface {
   private readonly terminal: TerminalExecutorInterface;
   private readonly configuration: VentilatorConfiguration;
 
@@ -31,7 +29,9 @@ export class VentilatorTerminalGateway
   public async increaseSpeed(steps: number): Promise<number> {
     let successfulSteps = 0;
     for (let step = 0; step < steps; step++) {
-      const isExecuted = await this.execute(this.configuration.ventilatorSpeedCommand);
+      const isExecuted = await this.execute(
+        this.configuration.ventilatorSpeedCommand,
+      );
       if (!isExecuted) {
         return successfulSteps;
       }
