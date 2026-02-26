@@ -31,6 +31,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY docker-entrypoint.sh /usr/local/bin/
 
+RUN apk add --no-cache python3
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3000
