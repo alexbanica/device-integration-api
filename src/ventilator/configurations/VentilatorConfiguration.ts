@@ -1,13 +1,7 @@
 import Dict = NodeJS.Dict;
+import { VentilatorConfigurationError } from './VentilatorConfigurationError';
 
-class VentilatorConfigurationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'VentilatorConfigurationError';
-  }
-}
-
-class VentilatorConfiguration {
+export class VentilatorConfiguration {
   private readonly _ventilatorWorkingDirectory: string;
   private readonly _ventilatorStartCommand: string;
   private readonly _ventilatorStopCommand: string;
@@ -26,27 +20,27 @@ class VentilatorConfiguration {
   private validateConfiguration(): void {
     if (!this._ventilatorWorkingDirectory) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_WORKING_DIRECTORY is required',
+        'VENTILATOR_SCRIPT_DIR is required',
       );
     }
     if (!this._ventilatorStartCommand) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_START_COMMAND is required',
+        'VENTILATOR_BASH_START is required',
       );
     }
     if (!this._ventilatorStopCommand) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_STOP_COMMAND is required',
+        'VENTILATOR_BASH_STOP is required',
       );
     }
     if (!this._ventilatorRotateCommand) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_ROTATE_COMMAND is required',
+        'VENTILATOR_BASH_ROTATE is required',
       );
     }
     if (!this._ventilatorSpeedCommand) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_SPEED_COMMAND is required',
+        'VENTILATOR_BASH_SPEED is required',
       );
     }
   }
@@ -71,5 +65,3 @@ class VentilatorConfiguration {
     return this._ventilatorSpeedCommand;
   }
 }
-
-export { VentilatorConfiguration };

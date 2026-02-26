@@ -1,23 +1,23 @@
 ### Start Ventilator
-POST {{host}}/api/ventilator/start
+POST {{host}}/api/v1/ventilator/start
 Accept: application/json
 
 ###
 
 ### Stop Ventilator
-POST {{host}}/api/ventilator/stop
+POST {{host}}/api/v1/ventilator/stop
 Accept: application/json
 
 ###
 
 ### Set Ventilator Speed
-PUT {{host}}/api/ventilator/speed/3
+PUT {{host}}/api/v1/ventilator/speed/3
 Accept: application/json
 
-### Set Ventilator Speed
-POST {{host}}/api/ventilator/rotate
+### Rotate Ventilator
+POST {{host}}/api/v1/ventilator/rotate
 Accept: application/json
 
 ### Get the state
-GET {{host}}/api/ventilator/state
+GET {{host}}/api/v1/ventilator/state
 Accept: application/json

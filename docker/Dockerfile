@@ -40,5 +40,5 @@ EXPOSE 3000
 ENV NODE_ENV=production
 USER node
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["npm", "start"]

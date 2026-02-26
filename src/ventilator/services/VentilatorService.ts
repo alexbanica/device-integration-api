@@ -1,94 +1,89 @@
-import { VentilatorTerminal } from '../infrastructure/VentilatorTerminal';
 import { VentilatorStateDto } from '../dtos/VentilatorStateDto';
+import { VentilatorTerminalGatewayInterface } from '../infrastructures/VentilatorTerminalGatewayInterface';
+import { VentilatorServiceInterface } from './VentilatorServiceInterface';
 
-export class VentilatorService {
+export class VentilatorService implements VentilatorServiceInterface {
   private static readonly MAX_SPEED = 3;
-  private readonly ventilatorTerminal: VentilatorTerminal;
-  private readonly _ventilatorState: VentilatorStateDto;
+  private readonly terminalGateway: VentilatorTerminalGatewayInterface;
+  private readonly state: VentilatorStateDto;
 
-  constructor(ventilatorTerminal: VentilatorTerminal) {
-    this.ventilatorTerminal = ventilatorTerminal;
-    this._ventilatorState = new VentilatorStateDto();
+  constructor(terminalGateway: VentilatorTerminalGatewayInterface) {
+    this.terminalGateway = terminalGateway;
+    this.state = new VentilatorStateDto();
   }
 
-  public async toggle(): Promise<void> {
-    console.log('Ventilator toggled. Before state:', this._ventilatorState);
-    if (this._ventilatorState.isOn) {
+  public async start(): Promise<void> {
+    if (this.state.isOn) {
+      return;
+    }
+
+    const isExecuted = await this.terminalGateway.start();
+    if (!isExecuted) {
+      throw new Error('Ventilator failed to start');
+    }
+
+    this.state.isOn = true;
+    this.state.speed = 1;
+    this.state.isRotating = false;
+  }
+
+  public async stop(): Promise<void> {
+    if (!this.state.isOn) {
+      return;
+    }
+
+    const isExecuted = await this.terminalGateway.stop();
+    if (!isExecuted) {
+      throw new Error('Ventilator failed to stop');
+    }
+
+    this.state.isOn = false;
+    this.state.speed = 0;
+    this.state.isRotating = false;
+  }
+
+  public async rotate(): Promise<void> {
+    const isExecuted = await this.terminalGateway.rotate();
+    if (!isExecuted) {
+      throw new Error('Ventilator failed to rotate');
+    }
+
+    this.state.isRotating = this.state.isOn;
+  }
+
+  public async setSpeed(desiredSpeed: number): Promise<void> {
+    if (desiredSpeed < 0 || desiredSpeed > VentilatorService.MAX_SPEED) {
+      throw new Error('Ventilator speed must be between 0 and 3');
+    }
+
+    if (desiredSpeed === 0) {
       await this.stop();
       return;
     }
 
-    await this.start();
+    if (!this.state.isOn) {
+      await this.start();
+    }
+
+    const currentSpeed = this.state.speed;
+    if (currentSpeed === desiredSpeed) {
+      return;
+    }
+
+    const requiredSteps =
+      desiredSpeed > currentSpeed
+        ? desiredSpeed - currentSpeed
+        : VentilatorService.MAX_SPEED - currentSpeed + desiredSpeed;
+
+    const actualSteps = await this.terminalGateway.increaseSpeed(requiredSteps);
+    if (actualSteps !== requiredSteps) {
+      throw new Error('Ventilator failed to reach requested speed');
+    }
+
+    this.state.speed = desiredSpeed;
   }
 
-  public async start(): Promise<void> {
-    if (this._ventilatorState.isOn) {
-      console.log('Ventilator already started. State:', this._ventilatorState);
-      return;
-    }
-    if (await this.ventilatorTerminal.start()) {
-      this._ventilatorState.isOn = true;
-      this._ventilatorState.speed = 1;
-      this._ventilatorState.isRotating = false;
-      console.log('Ventilator started. State:', this._ventilatorState);
-      return;
-    }
-    throw new Error('Ventilator failed to start');
-  }
-
-  public async stop(): Promise<void> {
-    if (!this._ventilatorState.isOn) {
-      console.log('Ventilator already stopped. State:', this._ventilatorState);
-      return;
-    }
-    if (await this.ventilatorTerminal.stop()) {
-      this._ventilatorState.isOn = false;
-      this._ventilatorState.speed = 0;
-      this._ventilatorState.isRotating = false;
-      console.log('Ventilator stopped. State:', this._ventilatorState);
-      return;
-    }
-    throw new Error('Ventilator failed to stop');
-  }
-
-  public async setSpeed(desiredSpeed: number): Promise<void> {
-    const actualSpeed = this._ventilatorState.speed;
-    if (actualSpeed === desiredSpeed || !this.ventilatorState.isOn) {
-      return;
-    }
-
-    const increase =
-      desiredSpeed > actualSpeed
-        ? desiredSpeed - actualSpeed
-        : VentilatorService.MAX_SPEED - actualSpeed + desiredSpeed;
-
-    const actualIncrease = await this.ventilatorTerminal.setSpeed(increase);
-    const newSpeed = actualSpeed + actualIncrease;
-    this._ventilatorState.speed =
-      newSpeed <= VentilatorService.MAX_SPEED
-        ? newSpeed
-        : newSpeed % VentilatorService.MAX_SPEED;
-    console.log(
-      `Ventilator speed set to ${desiredSpeed}. Actual speed: ${actualSpeed}. Actual increase: ${actualIncrease}. State:`,
-      this._ventilatorState,
-    );
-  }
-
-  public async rotate(): Promise<void> {
-    const isCommandExecuted = await this.ventilatorTerminal.rotate();
-    if (!isCommandExecuted) {
-      throw new Error('Ventilator failed to rotate');
-    }
-
-    if (this._ventilatorState.isOn && isCommandExecuted) {
-      this._ventilatorState.isRotating = true;
-      console.log('Ventilator rotating. State:', this._ventilatorState);
-      return;
-    }
-    this._ventilatorState.isRotating = false;
-  }
-
-  get ventilatorState(): VentilatorStateDto {
-    return this._ventilatorState;
+  public getState(): VentilatorStateDto {
+    return this.state;
   }
 }
