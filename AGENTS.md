@@ -35,5 +35,6 @@
 - Each spec is implemented in its own branch.
 - Do not implement specs in `main`/`master`.
 
-## Current Active Spec
+## Current Active Specs
 - `SPEC-001 - Ventilator Module Alignment` (`specs/SPEC-001-ventilator-module-alignment.md`, status: Approved, date: 2026-02-26)
+- `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`, status: Approved, date: 2026-02-26)
