@@ -46,7 +46,10 @@ export class VentilatorController {
     this.app.put(
       '/api/ventilator/speed/:speed',
       (req: Request, res: Response) => {
-        const speed = parseInt(req.params.speed, 10);
+        const speedParameter = Array.isArray(req.params.speed)
+          ? req.params.speed[0]
+          : req.params.speed;
+        const speed = parseInt(speedParameter, 10);
 
         if (isNaN(speed) || speed < 0 || speed > 3) {
           return res
