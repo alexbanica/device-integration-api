@@ -1,87 +1,68 @@
 import { Express, Request, Response } from 'express';
-import { VentilatorService } from '../services/VentilatorService';
-import { VentilatorStateDto } from '../dtos/VentilatorStateDto';
 import { ErrorResponse } from '../../common/controllers/responses/ErrorResponse';
+import { VentilatorServiceInterface } from '../services/VentilatorServiceInterface';
+import { VentilatorStateResponse } from './responses/VentilatorStateResponse';
+import { SetVentilatorSpeedRequest } from './requests/SetVentilatorSpeedRequest';
 
 export class VentilatorController {
   private readonly app: Express;
-  private readonly ventilatorService: VentilatorService;
+  private readonly ventilatorService: VentilatorServiceInterface;
 
-  constructor(app: Express, service: VentilatorService) {
+  constructor(app: Express, service: VentilatorServiceInterface) {
     this.app = app;
     this.ventilatorService = service;
     this.registerRoutes();
   }
 
   private registerRoutes(): void {
-    this.app.get('/api/ventilator/state', (req: Request, res: Response) => {
-      const ventilatorState = this.getState();
-      res.status(200).send(ventilatorState);
+    this.app.get('/api/v1/ventilator/state', (req: Request, res: Response) => {
+      const state = this.ventilatorService.getState();
+      res.status(200).send(new VentilatorStateResponse(state));
     });
 
-    this.app.post('/api/ventilator/start', (req: Request, res: Response) => {
-      this.start()
+    this.app.post('/api/v1/ventilator/start', (req: Request, res: Response) => {
+      this.ventilatorService
+        .start()
         .then(() => res.status(202).send())
-        .catch((error) =>
+        .catch((error: Error) =>
           res.status(500).send(new ErrorResponse(error.message)),
         );
     });
 
-    this.app.post('/api/ventilator/rotate', (req: Request, res: Response) => {
-      this.rotate()
+    this.app.post('/api/v1/ventilator/rotate', (req: Request, res: Response) => {
+      this.ventilatorService
+        .rotate()
         .then(() => res.status(202).send())
-        .catch((error) =>
+        .catch((error: Error) =>
           res.status(500).send(new ErrorResponse(error.message)),
         );
     });
 
-    this.app.post('/api/ventilator/stop', (req: Request, res: Response) => {
-      this.stop()
+    this.app.post('/api/v1/ventilator/stop', (req: Request, res: Response) => {
+      this.ventilatorService
+        .stop()
         .then(() => res.status(202).send())
-        .catch((error) =>
+        .catch((error: Error) =>
           res.status(500).send(new ErrorResponse(error.message)),
         );
     });
 
-    this.app.put(
-      '/api/ventilator/speed/:speed',
-      (req: Request, res: Response) => {
-        const speed = parseInt(req.params.speed, 10);
+    this.app.put('/api/v1/ventilator/speed/:speed', (req: Request, res: Response) => {
+      try {
+        const speedRequest = SetVentilatorSpeedRequest.fromRouteParameter(
+          req.params.speed,
+        );
 
-        if (isNaN(speed) || speed < 0 || speed > 3) {
-          return res
-            .status(400)
-            .json({ error: 'Speed must be a number between 0 and 3.' });
-        }
-
-        this.setSpeed(speed)
+        this.ventilatorService
+          .setSpeed(speedRequest.speed)
           .then(() => res.status(202).send())
-          .catch((error) => res.status(500).send(error));
-      },
-    );
-  }
-
-  private async start(): Promise<void> {
-    await this.ventilatorService.start();
-  }
-
-  private async rotate(): Promise<void> {
-    await this.ventilatorService.rotate();
-  }
-
-  private async stop(): Promise<void> {
-    await this.ventilatorService.stop();
-  }
-
-  private async setSpeed(speed: number): Promise<void> {
-    if (speed === 0) {
-      await this.ventilatorService.stop();
-      return;
-    }
-    await this.ventilatorService.setSpeed(speed);
-  }
-
-  private getState(): VentilatorStateDto {
-    return this.ventilatorService.ventilatorState;
+          .catch((error: Error) =>
+            res.status(500).send(new ErrorResponse(error.message)),
+          );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Invalid request';
+        res.status(400).send(new ErrorResponse(message));
+      }
+    });
   }
 }

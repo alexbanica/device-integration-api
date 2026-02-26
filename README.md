@@ -13,14 +13,22 @@ Device Integration API is a Node.js server project written in TypeScript that pr
 ---
 
 ## Table of Contents
-1. [Prerequisites](#prerequisites)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [Scripts](#scripts)
-5. [Building and Running with Docker](#building-and-running-with-docker)
-6. [License](#license)
+1. [Architecture and Spec Workflow](#architecture-and-spec-workflow)
+2. [Prerequisites](#prerequisites)
+3. [Installation](#installation)
+4. [Usage](#usage)
+5. [Scripts](#scripts)
+6. [Building and Running with Docker](#building-and-running-with-docker)
+7. [License](#license)
 
 ---
+
+## Architecture and Spec Workflow
+- Source modules are separated under `src` by package (`common`, `ventilator`, and future device packages).
+- All implementation changes are spec-driven and must be approved before coding.
+- Specs are stored under `specs/`.
+- Agent and architecture conventions are tracked in `AGENTS.md`.
+- API routes are versioned under `/api/v1`.
 
 ## Prerequisites
 - Node.js >= 19
@@ -94,4 +102,3 @@ Key `npm` scripts included in this project:
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-If you'd like more details added, feel free to ask!

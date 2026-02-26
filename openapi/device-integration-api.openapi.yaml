@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Device Integration API
+  version: 1.0.0
+  description: API for controlling Raspberry Pi connected devices.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/v1/health:
+    get:
+      summary: Application health
+      responses:
+        '200':
+          description: Application is healthy
+        '503':
+          description: Dependency is down
+  /api/v1/ventilator/state:
+    get:
+      summary: Get ventilator state
+      responses:
+        '200':
+          description: Current ventilator state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentilatorState'
+  /api/v1/ventilator/start:
+    post:
+      summary: Start ventilator
+      responses:
+        '202':
+          description: Command accepted
+        '500':
+          description: Command failed
+  /api/v1/ventilator/stop:
+    post:
+      summary: Stop ventilator
+      responses:
+        '202':
+          description: Command accepted
+        '500':
+          description: Command failed
+  /api/v1/ventilator/rotate:
+    post:
+      summary: Toggle ventilator rotation
+      responses:
+        '202':
+          description: Command accepted
+        '500':
+          description: Command failed
+  /api/v1/ventilator/speed/{speed}:
+    put:
+      summary: Set ventilator speed
+      parameters:
+        - name: speed
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 3
+      responses:
+        '202':
+          description: Command accepted
+        '400':
+          description: Invalid speed parameter
+        '500':
+          description: Command failed
+components:
+  schemas:
+    VentilatorState:
+      type: object
+      required:
+        - isOn
+        - speed
+        - isRotating
+      properties:
+        isOn:
+          type: boolean
+        speed:
+          type: integer
+          minimum: 0
+          maximum: 3
+        isRotating:
+          type: boolean

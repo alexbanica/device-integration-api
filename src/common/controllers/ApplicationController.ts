@@ -1,5 +1,6 @@
 import { Express, Request, Response } from 'express';
 import { ApplicationStatusDto } from '../dtos/ApplicationStatusDto';
+import { ApplicationStatus } from '../enums/ApplicationStatus';
 
 export class ApplicationController {
   private readonly app: Express;
@@ -10,9 +11,9 @@ export class ApplicationController {
   }
 
   private registerRoutes(): void {
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/api/v1/health', (req: Request, res: Response) => {
       const status = this.getApplicationStatus();
-      if (status.status === 'DOWN') {
+      if (status.status === ApplicationStatus.DOWN) {
         res.status(503).send(status);
         return;
       }
