@@ -49,8 +49,11 @@ export class VentilatorController {
 
     this.app.put('/api/v1/ventilator/speed/:speed', (req: Request, res: Response) => {
       try {
+        const speedParameter = Array.isArray(req.params.speed)
+          ? req.params.speed[0]
+          : req.params.speed;
         const speedRequest = SetVentilatorSpeedRequest.fromRouteParameter(
-          req.params.speed,
+          speedParameter,
         );
 
         this.ventilatorService
