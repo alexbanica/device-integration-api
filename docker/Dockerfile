@@ -29,6 +29,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/infrared-commands ./infrared-commands
 COPY docker-entrypoint.sh /usr/local/bin/
 
 RUN apk add --no-cache python3 py3-pip su-exec && \
@@ -38,6 +39,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 3000
 
 ENV NODE_ENV=production
+ENV VENTILATOR_IR_COMMANDS_DIR=/app/infrared-commands/ventilator
+ENV VENTILATOR_IR_START_FILE=start.json
+ENV VENTILATOR_IR_STOP_FILE=stop.json
+ENV VENTILATOR_IR_ROTATE_FILE=rotate.json
+ENV VENTILATOR_IR_SPEED_FILE=speed.json
 USER node
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

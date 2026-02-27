@@ -107,6 +107,8 @@ Key `npm` scripts included in this project:
    ```
 
 2. Ensure `pigpiod` is already running on the host and reachable on `localhost:8888`.
+   The image now includes default ventilator IR command files under `/app/infrared-commands/ventilator`.
+   You can override file location/names with `VENTILATOR_IR_COMMANDS_DIR` and `VENTILATOR_IR_*_FILE` env vars.
 
 3. Run the Docker container with host networking:
    ```bash
