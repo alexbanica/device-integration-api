@@ -4,15 +4,37 @@ import { InfraredEmitterInterface } from './InfraredEmitterInterface';
 import { InfraredWavePulseDto } from '../dtos/InfraredWavePulseDto';
 
 type JsonObject = Record<string, unknown>;
-type PigpioClientType = Record<string, unknown>;
+type PigpioWavePulse = [number, number, number];
+
+interface PigpioGpioInterface {
+  modeSet(mode: 'input' | 'in' | 'output' | 'out'): Promise<void>;
+  write(level: number): Promise<void>;
+  waveClear(): Promise<void>;
+  waveAddPulse(pulses: PigpioWavePulse[]): Promise<void>;
+  waveCreate(): Promise<number>;
+  waveSendOnce(waveId: number): Promise<number>;
+  waveBusy(): Promise<number>;
+  waveDelete(waveId: number): Promise<void>;
+}
+
+interface PigpioConnectionInterface {
+  once(event: 'connected' | 'error', listener: (...args: unknown[]) => void): void;
+  gpio(gpioPin: number): PigpioGpioInterface;
+}
+
+interface PigpioModuleInterface {
+  pigpio(options: { host: string; port: number }): PigpioConnectionInterface;
+}
 
 export class PigpioClientInfraredEmitter implements InfraredEmitterInterface {
   private readonly configuration: InfraredHardwareConfiguration;
-  private client: PigpioClientType | null;
+  private client: PigpioConnectionInterface | null;
+  private gpio: PigpioGpioInterface | null;
 
   constructor(configuration: InfraredHardwareConfiguration) {
     this.configuration = configuration;
     this.client = null;
+    this.gpio = null;
   }
 
   public async emitFromFile(filePath: string): Promise<void> {
@@ -21,41 +43,39 @@ export class PigpioClientInfraredEmitter implements InfraredEmitterInterface {
   }
 
   private async emit(pulseDurations: number[]): Promise<void> {
-    const client = await this.getClient();
+    const gpio = await this.getGpio();
     const gpioMask = 1 << this.configuration.infraredOutputGpio;
-    const wavePulses = this.toWavePulses(pulseDurations, gpioMask);
+    const wavePulses = this.toWavePulses(pulseDurations, gpioMask).map(
+      (pulse): PigpioWavePulse => [pulse.gpioOn, pulse.gpioOff, pulse.usDelay],
+    );
 
-    await this.invokeFirstAvailable(client, ['waveClear', 'wave_clear']);
-    await this.invokeFirstAvailable(
-      client,
-      ['waveAddGeneric', 'wave_add_generic', 'waveAddPulse', 'wave_add_pulse'],
-      [wavePulses],
-    );
-    const waveId = await this.invokeFirstAvailable<number>(
-      client,
-      ['waveCreate', 'wave_create'],
-    );
+    await gpio.modeSet('output');
+    await gpio.write(0);
+
+    await gpio.waveClear();
+    await gpio.waveAddPulse(wavePulses);
+    const waveId = await gpio.waveCreate();
     if (!Number.isInteger(waveId) || waveId < 0) {
       throw new Error(`Failed to create pigpio wave: ${waveId}`);
     }
 
     try {
-      for (let repetition = 0; repetition < this.configuration.infraredRepeatCount; repetition++) {
-        await this.invokeFirstAvailable(client, [
-          'waveSendOnce',
-          'wave_send_once',
-          'waveTxSend',
-          'wave_tx_send',
-        ], [waveId]);
-        await this.waitWaveTransmission(client);
+      for (
+        let repetition = 0;
+        repetition < this.configuration.infraredRepeatCount;
+        repetition++
+      ) {
+        await gpio.waveSendOnce(waveId);
+        await this.waitWaveTransmission(gpio);
       }
     } finally {
-      await this.invokeFirstAvailable(client, ['waveDelete', 'wave_delete'], [waveId]);
+      await gpio.waveDelete(waveId);
+      await gpio.write(0);
     }
   }
 
-  private async waitWaveTransmission(client: PigpioClientType): Promise<void> {
-    while (await this.invokeFirstAvailable<boolean>(client, ['waveTxBusy', 'wave_tx_busy'])) {
+  private async waitWaveTransmission(gpio: PigpioGpioInterface): Promise<void> {
+    while ((await gpio.waveBusy()) === 1) {
       await new Promise((resolve) => setTimeout(resolve, 1));
     }
   }
@@ -130,77 +150,50 @@ export class PigpioClientInfraredEmitter implements InfraredEmitterInterface {
     return durations;
   }
 
-  private async getClient(): Promise<PigpioClientType> {
+  private async getGpio(): Promise<PigpioGpioInterface> {
+    if (this.gpio) {
+      return this.gpio;
+    }
+
+    const client = await this.getClient();
+    this.gpio = client.gpio(this.configuration.infraredOutputGpio);
+    return this.gpio;
+  }
+
+  private async getClient(): Promise<PigpioConnectionInterface> {
     if (this.client) {
       return this.client;
     }
 
-    const moduleUnknown: unknown = require('pigpio-client');
-    const factory = this.resolvePigpioFactory(moduleUnknown);
-    const client = factory({
+    const pigpioModule = require('pigpio-client') as PigpioModuleInterface;
+    if (!pigpioModule || typeof pigpioModule.pigpio !== 'function') {
+      throw new Error('pigpio-client does not expose pigpio(options) factory');
+    }
+
+    const client = pigpioModule.pigpio({
       host: this.configuration.pigpioHost,
       port: this.configuration.pigpioPort,
     });
 
-    await this.ensureConnected(client);
+    await this.waitForConnection(client);
     this.client = client;
     return client;
   }
 
-  private resolvePigpioFactory(
-    moduleUnknown: unknown,
-  ): (options: { host: string; port: number }) => PigpioClientType {
-    if (
-      typeof moduleUnknown === 'object' &&
-      moduleUnknown !== null &&
-      'pigpio' in moduleUnknown &&
-      typeof (moduleUnknown as { pigpio: unknown }).pigpio === 'function'
-    ) {
-      return (moduleUnknown as { pigpio: (options: { host: string; port: number }) => PigpioClientType }).pigpio;
-    }
-
-    if (typeof moduleUnknown === 'function') {
-      return moduleUnknown as (options: {
-        host: string;
-        port: number;
-      }) => PigpioClientType;
-    }
-
-    throw new Error('pigpio-client module is available but has unknown API');
-  }
-
-  private async ensureConnected(client: PigpioClientType): Promise<void> {
-    if (typeof client.connect === 'function') {
-      await (client.connect as () => Promise<void>)();
-    }
-    if (typeof client.connected === 'function') {
-      const connected = await (client.connected as () => Promise<boolean>)();
-      if (!connected) {
-        throw new Error(
-          `Cannot connect to pigpio endpoint ${this.configuration.pigpioHost}:${this.configuration.pigpioPort}`,
+  private async waitForConnection(
+    client: PigpioConnectionInterface,
+  ): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      client.once('connected', () => resolve());
+      client.once('error', (error: unknown) => {
+        const message =
+          error instanceof Error ? error.message : 'unknown_connection_error';
+        reject(
+          new Error(
+            `Cannot connect to pigpio endpoint ${this.configuration.pigpioHost}:${this.configuration.pigpioPort}. ${message}`,
+          ),
         );
-      }
-    }
-  }
-
-  private async invokeFirstAvailable<T = void>(
-    target: PigpioClientType,
-    functionNames: string[],
-    args: unknown[] = [],
-  ): Promise<T> {
-    for (const functionName of functionNames) {
-      const candidate = target[functionName];
-      if (typeof candidate === 'function') {
-        const result = (candidate as (...values: unknown[]) => unknown).apply(
-          target,
-          args,
-        );
-        return (await Promise.resolve(result)) as T;
-      }
-    }
-
-    throw new Error(
-      `Unsupported pigpio-client API. Missing one of: ${functionNames.join(', ')}`,
-    );
+      });
+    });
   }
 }
