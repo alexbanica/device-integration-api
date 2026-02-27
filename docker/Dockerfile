@@ -32,8 +32,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/infrared-commands ./infrared-commands
 COPY docker-entrypoint.sh /usr/local/bin/
 
-RUN apk add --no-cache python3 py3-pip su-exec && \
-    pip3 install pigpio
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3000
