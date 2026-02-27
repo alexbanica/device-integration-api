@@ -24,11 +24,29 @@ Device Integration API is a Node.js server project written in TypeScript that pr
 ---
 
 ## Architecture and Spec Workflow
-- Source modules are separated under `src` by package (`common`, `ventilator`, and future device packages).
+- Source modules are separated under `src` by package (`common`, `ventilator`, `hardwares` for hardware-specific IR transport, and future device packages).
 - All implementation changes are spec-driven and must be approved before coding.
 - Specs are stored under `specs/`.
 - Agent and architecture conventions are tracked in `AGENTS.md`.
 - API routes are versioned under `/api/v1`.
+
+### Ventilator IR Configuration
+The ventilator module now uses Node.js `pigpio-client` IR emission instead of shell/Python scripts.
+
+Required env vars:
+- `VENTILATOR_IR_COMMANDS_DIR`: directory containing command JSON files with `pulse_us`.
+- `VENTILATOR_IR_START_FILE`: IR JSON filename for start command.
+- `VENTILATOR_IR_STOP_FILE`: IR JSON filename for stop command.
+- `VENTILATOR_IR_ROTATE_FILE`: IR JSON filename for rotate command.
+- `VENTILATOR_IR_SPEED_FILE`: IR JSON filename for speed-step command.
+
+Optional env vars:
+- `PIGPIO_HOST` (default `localhost`)
+- `PIGPIO_PORT` (default `8888`)
+- `INFRARED_OUT_GPIO` (default `12`)
+- `INFRARED_CARRIER_HZ` (default `38000`)
+- `INFRARED_DUTY_CYCLE` (default `0.5`)
+- `INFRARED_REPEAT` (default `1`)
 
 ## Prerequisites
 - Node.js >= 19

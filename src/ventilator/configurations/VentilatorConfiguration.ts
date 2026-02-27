@@ -2,66 +2,70 @@ import Dict = NodeJS.Dict;
 import { VentilatorConfigurationError } from './VentilatorConfigurationError';
 
 export class VentilatorConfiguration {
-  private readonly _ventilatorWorkingDirectory: string;
-  private readonly _ventilatorStartCommand: string;
-  private readonly _ventilatorStopCommand: string;
-  private readonly _ventilatorRotateCommand: string;
-  private readonly _ventilatorSpeedCommand: string;
+  private readonly _ventilatorInfraredCommandsDirectory: string;
+  private readonly _ventilatorStartInfraredCommandFile: string;
+  private readonly _ventilatorStopInfraredCommandFile: string;
+  private readonly _ventilatorRotateInfraredCommandFile: string;
+  private readonly _ventilatorSpeedInfraredCommandFile: string;
 
   constructor(env: Dict<string>) {
-    this._ventilatorWorkingDirectory = env.VENTILATOR_SCRIPT_DIR || '';
-    this._ventilatorStartCommand = env.VENTILATOR_BASH_START || '';
-    this._ventilatorStopCommand = env.VENTILATOR_BASH_STOP || '';
-    this._ventilatorRotateCommand = env.VENTILATOR_BASH_ROTATE || '';
-    this._ventilatorSpeedCommand = env.VENTILATOR_BASH_SPEED || '';
+    this._ventilatorInfraredCommandsDirectory =
+      env.VENTILATOR_IR_COMMANDS_DIR || '';
+    this._ventilatorStartInfraredCommandFile =
+      env.VENTILATOR_IR_START_FILE || '';
+    this._ventilatorStopInfraredCommandFile = env.VENTILATOR_IR_STOP_FILE || '';
+    this._ventilatorRotateInfraredCommandFile =
+      env.VENTILATOR_IR_ROTATE_FILE || '';
+    this._ventilatorSpeedInfraredCommandFile =
+      env.VENTILATOR_IR_SPEED_FILE || '';
     this.validateConfiguration();
   }
 
   private validateConfiguration(): void {
-    if (!this._ventilatorWorkingDirectory) {
+    if (!this._ventilatorInfraredCommandsDirectory) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_SCRIPT_DIR is required',
+        'VENTILATOR_IR_COMMANDS_DIR is required',
       );
     }
-    if (!this._ventilatorStartCommand) {
+    if (!this._ventilatorStartInfraredCommandFile) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_BASH_START is required',
+        'VENTILATOR_IR_START_FILE is required',
       );
     }
-    if (!this._ventilatorStopCommand) {
+    if (!this._ventilatorStopInfraredCommandFile) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_BASH_STOP is required',
+        'VENTILATOR_IR_STOP_FILE is required',
       );
     }
-    if (!this._ventilatorRotateCommand) {
+    if (!this._ventilatorRotateInfraredCommandFile) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_BASH_ROTATE is required',
+        'VENTILATOR_IR_ROTATE_FILE is required',
       );
     }
-    if (!this._ventilatorSpeedCommand) {
+    if (!this._ventilatorSpeedInfraredCommandFile) {
       throw new VentilatorConfigurationError(
-        'VENTILATOR_BASH_SPEED is required',
+        'VENTILATOR_IR_SPEED_FILE is required',
       );
     }
   }
 
-  get ventilatorWorkingDirectory(): string {
-    return this._ventilatorWorkingDirectory;
+  get ventilatorInfraredCommandsDirectory(): string {
+    return this._ventilatorInfraredCommandsDirectory;
   }
 
-  get ventilatorStartCommand(): string {
-    return this._ventilatorStartCommand;
+  get ventilatorStartInfraredCommandFile(): string {
+    return this._ventilatorStartInfraredCommandFile;
   }
 
-  get ventilatorStopCommand(): string {
-    return this._ventilatorStopCommand;
+  get ventilatorStopInfraredCommandFile(): string {
+    return this._ventilatorStopInfraredCommandFile;
   }
 
-  get ventilatorRotateCommand(): string {
-    return this._ventilatorRotateCommand;
+  get ventilatorRotateInfraredCommandFile(): string {
+    return this._ventilatorRotateInfraredCommandFile;
   }
 
-  get ventilatorSpeedCommand(): string {
-    return this._ventilatorSpeedCommand;
+  get ventilatorSpeedInfraredCommandFile(): string {
+    return this._ventilatorSpeedInfraredCommandFile;
   }
 }

@@ -38,3 +38,4 @@
 ## Current Active Specs
 - `SPEC-001 - Ventilator Module Alignment` (`specs/SPEC-001-ventilator-module-alignment.md`, status: Approved, date: 2026-02-26)
 - `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`, status: Approved, date: 2026-02-26)
+- `SPEC-003 - Node pigpio-client IR Emitter Package` (`specs/SPEC-003-node-pigpio-client-ir-emitter.md`, status: Approved, date: 2026-02-27)

@@ -3,15 +3,24 @@ import { VentilatorConfiguration } from './configurations/VentilatorConfiguratio
 import { VentilatorController } from './controllers/VentilatorController';
 import { VentilatorService } from './services/VentilatorService';
 import { VentilatorTerminalGateway } from './infrastructures/VentilatorTerminalGateway';
-import { LocalMachineTerminal } from '../common/infrastructures/LocalMachineTerminal';
+import { InfraredHardwareConfiguration } from '../hardwares/configurations/InfraredHardwareConfiguration';
+import { PigpioClientInfraredEmitter } from '../hardwares/infrastructures/PigpioClientInfraredEmitter';
+import { InfraredHardwareCommandExecutor } from '../common/infrastructures/InfraredHardwareCommandExecutor';
 
 function register_ventilator_module(
   app: Express,
   env: NodeJS.Dict<string> = process.env,
 ) {
-  const configuration = new VentilatorConfiguration(env);
-  const terminal = new LocalMachineTerminal();
-  const gateway = new VentilatorTerminalGateway(terminal, configuration);
+  const ventilatorConfiguration = new VentilatorConfiguration(env);
+  const infraredHardwareConfiguration = new InfraredHardwareConfiguration(env);
+  const infraredEmitter = new PigpioClientInfraredEmitter(
+    infraredHardwareConfiguration,
+  );
+  const commandExecutor = new InfraredHardwareCommandExecutor(infraredEmitter);
+  const gateway = new VentilatorTerminalGateway(
+    commandExecutor,
+    ventilatorConfiguration,
+  );
   const service = new VentilatorService(gateway);
   new VentilatorController(app, service);
 }

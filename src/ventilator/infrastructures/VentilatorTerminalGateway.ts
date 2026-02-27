@@ -1,36 +1,37 @@
 import { VentilatorConfiguration } from '../configurations/VentilatorConfiguration';
-import { TerminalExecutorInterface } from '../../common/infrastructures/TerminalExecutorInterface';
+import path from 'node:path';
+import { HardwareCommandExecutorInterface } from '../../common/infrastructures/HardwareCommandExecutorInterface';
 import { VentilatorTerminalGatewayInterface } from './VentilatorTerminalGatewayInterface';
 
 export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInterface {
-  private readonly terminal: TerminalExecutorInterface;
+  private readonly hardwareCommandExecutor: HardwareCommandExecutorInterface;
   private readonly configuration: VentilatorConfiguration;
 
   constructor(
-    terminal: TerminalExecutorInterface,
+    hardwareCommandExecutor: HardwareCommandExecutorInterface,
     configuration: VentilatorConfiguration,
   ) {
-    this.terminal = terminal;
+    this.hardwareCommandExecutor = hardwareCommandExecutor;
     this.configuration = configuration;
   }
 
   public async start(): Promise<boolean> {
-    return this.execute(this.configuration.ventilatorStartCommand);
+    return this.execute(this.configuration.ventilatorStartInfraredCommandFile);
   }
 
   public async stop(): Promise<boolean> {
-    return this.execute(this.configuration.ventilatorStopCommand);
+    return this.execute(this.configuration.ventilatorStopInfraredCommandFile);
   }
 
   public async rotate(): Promise<boolean> {
-    return this.execute(this.configuration.ventilatorRotateCommand);
+    return this.execute(this.configuration.ventilatorRotateInfraredCommandFile);
   }
 
   public async increaseSpeed(steps: number): Promise<number> {
     let successfulSteps = 0;
     for (let step = 0; step < steps; step++) {
       const isExecuted = await this.execute(
-        this.configuration.ventilatorSpeedCommand,
+        this.configuration.ventilatorSpeedInfraredCommandFile,
       );
       if (!isExecuted) {
         return successfulSteps;
@@ -40,11 +41,12 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
     return successfulSteps;
   }
 
-  private async execute(command: string): Promise<boolean> {
-    const result = await this.terminal.execute(
-      command,
-      this.configuration.ventilatorWorkingDirectory,
+  private async execute(commandFile: string): Promise<boolean> {
+    const commandFilePath = path.resolve(
+      this.configuration.ventilatorInfraredCommandsDirectory,
+      commandFile,
     );
+    const result = await this.hardwareCommandExecutor.execute(commandFilePath);
     return result === 0;
   }
 }
