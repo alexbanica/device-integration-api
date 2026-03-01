@@ -47,6 +47,13 @@ Device Integration API is a Node.js server project written in TypeScript that pr
    ```
 
 3. Create a `.env` file in the root directory and specify environment variables. (Refer to `.env` for the required variables.)
+Required ventilator variables:
+   - `VENTILATOR_SCRIPT_DIR`
+   - `VENTILATOR_BASH_START`
+   - `VENTILATOR_BASH_STOP`
+   - `VENTILATOR_BASH_ROTATE`
+   - `VENTILATOR_BASH_SPEED`
+   - `VENTILATOR_STANDBY_TIMEOUT_MS` (optional, milliseconds, integer, `>= 0`, default `60000`)
 
 ---
 
