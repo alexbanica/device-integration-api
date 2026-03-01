@@ -24,6 +24,7 @@ Ensure deterministic ventilator command execution when the physical device enter
 - Standby timeout (`ventilatorStandbyTimeoutMs`): max allowed inactivity duration (in milliseconds) since last successful terminal command execution before the next command is considered at risk of being consumed as wakeup.
 - Inactivity window: elapsed wall-clock time since last successful command execution for ventilator control.
 - Wakeup pre-command: one execution of ventilator `on_off` command used only to bring device out of standby before the intended command.
+- Wakeup pre-command command source: `VENTILATOR_BASH_START` (treated as `on_off` command).
 - Intended command: the command originally requested by service logic (`start`, `stop`, `rotate`, or speed-step command).
 
 ## Behavioral Requirements
