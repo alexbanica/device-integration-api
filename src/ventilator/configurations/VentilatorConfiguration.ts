@@ -7,6 +7,7 @@ export class VentilatorConfiguration {
   private readonly _ventilatorStopCommand: string;
   private readonly _ventilatorRotateCommand: string;
   private readonly _ventilatorSpeedCommand: string;
+  private readonly _ventilatorStandbyTimeoutMs: number;
 
   constructor(env: Dict<string>) {
     this._ventilatorWorkingDirectory = env.VENTILATOR_SCRIPT_DIR || '';
@@ -14,6 +15,10 @@ export class VentilatorConfiguration {
     this._ventilatorStopCommand = env.VENTILATOR_BASH_STOP || '';
     this._ventilatorRotateCommand = env.VENTILATOR_BASH_ROTATE || '';
     this._ventilatorSpeedCommand = env.VENTILATOR_BASH_SPEED || '';
+    this._ventilatorStandbyTimeoutMs = Number.parseInt(
+      env.VENTILATOR_STANDBY_TIMEOUT_MS || '',
+      10,
+    );
     this.validateConfiguration();
   }
 
@@ -43,6 +48,16 @@ export class VentilatorConfiguration {
         'VENTILATOR_BASH_SPEED is required',
       );
     }
+    if (!Number.isInteger(this._ventilatorStandbyTimeoutMs)) {
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_STANDBY_TIMEOUT_MS must be an integer',
+      );
+    }
+    if (this._ventilatorStandbyTimeoutMs < 0) {
+      throw new VentilatorConfigurationError(
+        'VENTILATOR_STANDBY_TIMEOUT_MS must be greater than or equal to 0',
+      );
+    }
   }
 
   get ventilatorWorkingDirectory(): string {
@@ -63,5 +78,9 @@ export class VentilatorConfiguration {
 
   get ventilatorSpeedCommand(): string {
     return this._ventilatorSpeedCommand;
+  }
+
+  get ventilatorStandbyTimeoutMs(): number {
+    return this._ventilatorStandbyTimeoutMs;
   }
 }
