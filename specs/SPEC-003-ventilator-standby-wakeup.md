@@ -86,7 +86,7 @@ Ensure deterministic ventilator command execution when the physical device enter
 
 ## Documentation Requirements
 - Add this spec file under `specs/`.
-- Update `AGENTS.md` active specs list with draft status.
+- Update `AGENTS.md` active specs list with approved status.
 - Update `README.md` environment variables section when implementation is approved and completed.
 
 ## Acceptance Criteria
