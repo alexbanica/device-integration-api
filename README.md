@@ -53,7 +53,7 @@ Required ventilator variables:
    - `VENTILATOR_BASH_STOP`
    - `VENTILATOR_BASH_ROTATE`
    - `VENTILATOR_BASH_SPEED`
-   - `VENTILATOR_STANDBY_TIMEOUT_MS` (milliseconds, integer, `>= 0`)
+   - `VENTILATOR_STANDBY_TIMEOUT_MS` (optional, milliseconds, integer, `>= 0`, default `60000`)
 
 ---
 

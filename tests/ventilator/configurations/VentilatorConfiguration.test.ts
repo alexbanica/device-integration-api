@@ -34,18 +34,16 @@ test('throws when mandatory env var is missing', () => {
   );
 });
 
-test('throws when standby timeout env var is missing', () => {
-  assert.throws(
-    () =>
-      new VentilatorConfiguration({
-        VENTILATOR_SCRIPT_DIR: '/tmp',
-        VENTILATOR_BASH_START: './start.sh',
-        VENTILATOR_BASH_STOP: './stop.sh',
-        VENTILATOR_BASH_ROTATE: './rotate.sh',
-        VENTILATOR_BASH_SPEED: './speed.sh',
-      }),
-    { message: 'VENTILATOR_STANDBY_TIMEOUT_MS must be an integer' },
-  );
+test('uses default standby timeout when env var is missing', () => {
+  const configuration = new VentilatorConfiguration({
+    VENTILATOR_SCRIPT_DIR: '/tmp',
+    VENTILATOR_BASH_START: './start.sh',
+    VENTILATOR_BASH_STOP: './stop.sh',
+    VENTILATOR_BASH_ROTATE: './rotate.sh',
+    VENTILATOR_BASH_SPEED: './speed.sh',
+  });
+
+  assert.equal(configuration.ventilatorStandbyTimeoutMs, 60000);
 });
 
 test('throws when standby timeout env var is not an integer', () => {

@@ -29,10 +29,11 @@ Ensure deterministic ventilator command execution when the physical device enter
 
 ## Behavioral Requirements
 1. Environment configuration
-- Introduce required env variable `VENTILATOR_STANDBY_TIMEOUT_MS`.
-- Value MUST be parsed as integer milliseconds.
+- Introduce env variable `VENTILATOR_STANDBY_TIMEOUT_MS`.
+- Value MUST be parsed as integer milliseconds when provided.
 - Value MUST be greater than or equal to `0`.
-- Missing, non-integer, or negative values MUST fail startup via `VentilatorConfigurationError`.
+- Missing value defaults to `60000` milliseconds.
+- Non-integer or negative values MUST fail startup via `VentilatorConfigurationError`.
 
 2. Standby-aware command orchestration
 - For each intended command execution, compute inactivity window from last successful ventilator command timestamp.

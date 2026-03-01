@@ -2,6 +2,7 @@ import Dict = NodeJS.Dict;
 import { VentilatorConfigurationError } from './VentilatorConfigurationError';
 
 export class VentilatorConfiguration {
+  private static readonly DEFAULT_STANDBY_TIMEOUT_MS = 60000;
   private readonly _ventilatorWorkingDirectory: string;
   private readonly _ventilatorStartCommand: string;
   private readonly _ventilatorStopCommand: string;
@@ -15,10 +16,10 @@ export class VentilatorConfiguration {
     this._ventilatorStopCommand = env.VENTILATOR_BASH_STOP || '';
     this._ventilatorRotateCommand = env.VENTILATOR_BASH_ROTATE || '';
     this._ventilatorSpeedCommand = env.VENTILATOR_BASH_SPEED || '';
-    this._ventilatorStandbyTimeoutMs = Number.parseInt(
-      env.VENTILATOR_STANDBY_TIMEOUT_MS || '',
-      10,
-    );
+    this._ventilatorStandbyTimeoutMs =
+      env.VENTILATOR_STANDBY_TIMEOUT_MS === undefined
+        ? VentilatorConfiguration.DEFAULT_STANDBY_TIMEOUT_MS
+        : Number.parseInt(env.VENTILATOR_STANDBY_TIMEOUT_MS, 10);
     this.validateConfiguration();
   }
 
