@@ -10,8 +10,25 @@
 - Apply DDD-style layering with onion-oriented dependency direction:
   - Controllers -> Services Interfaces -> Domain/DTOs
   - Infrastructure implements interfaces and is wired in composition root.
+- Dependency direction is inward: controllers and infrastructure depend on service/domain contracts, while service contracts and DTOs remain independent of Express, shell execution, GPIO, Docker, and process-runtime concerns.
+- `src/device_integration_api.ts` is the application entrypoint and composition root.
+- `src/common` contains shared HTTP/application primitives.
+- `src/ventilator` contains the ventilator bounded context.
 - Entities represent datastore-backed objects.
 - DTOs represent non-persistent payload/state objects.
+
+## Project-Specific Architecture
+- `src/common/controllers`: application-level REST controllers, currently health/status.
+- `src/common/controllers/responses`: shared HTTP response DTOs.
+- `src/common/dtos` and `src/common/enums`: common application state contracts.
+- `src/common/infrastructures`: shared runtime adapters; `TerminalExecutorInterface` is the shell execution port and `LocalMachineTerminal` is the local adapter.
+- `src/ventilator/configurations`: environment/config loading and validation for ventilator shell integration.
+- `src/ventilator/controllers`: versioned ventilator REST API boundary.
+- `src/ventilator/controllers/requests` and `src/ventilator/controllers/responses`: HTTP DTOs for ventilator commands and state.
+- `src/ventilator/dtos`: service-level ventilator state objects.
+- `src/ventilator/services`: ventilator use-case orchestration behind `VentilatorServiceInterface`.
+- `src/ventilator/infrastructures`: terminal/gateway adapters behind `VentilatorTerminalGatewayInterface`.
+- Root `http/` files document and exercise controller contracts.
 
 ## Coding Rules
 - One class per file.
