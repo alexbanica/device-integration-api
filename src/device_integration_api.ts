@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import dotenv from 'dotenv';
-import { register_ventilator_module } from './ventilator/ventilator';
+import { register_fan_module } from './fan/fan';
 import { register_common_module } from './common/common';
 
 dotenv.config();
@@ -10,7 +10,7 @@ const app = express();
 
 function register_modules(app: Express) {
   register_common_module(app);
-  register_ventilator_module(app, process.env);
+  register_fan_module(app, process.env);
 }
 
 register_modules(app);

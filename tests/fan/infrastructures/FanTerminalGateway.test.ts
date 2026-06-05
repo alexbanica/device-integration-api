@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VentilatorConfiguration } from '../../../src/ventilator/configurations/VentilatorConfiguration';
-import { VentilatorTerminalGateway } from '../../../src/ventilator/infrastructures/VentilatorTerminalGateway';
+import { FanConfiguration } from '../../../src/fan/configurations/FanConfiguration';
+import { FanTerminalGateway } from '../../../src/fan/infrastructures/FanTerminalGateway';
 import { TerminalExecutorInterface } from '../../../src/common/infrastructures/TerminalExecutorInterface';
 
 class TerminalExecutorStub implements TerminalExecutorInterface {
@@ -25,20 +25,20 @@ class TerminalExecutorStub implements TerminalExecutorInterface {
 }
 
 function buildConfiguration(standbyTimeoutMs: string = '1000') {
-  return new VentilatorConfiguration({
-    VENTILATOR_SCRIPT_DIR: '/tmp',
-    VENTILATOR_BASH_START: './on_off.sh',
-    VENTILATOR_BASH_STOP: './stop.sh',
-    VENTILATOR_BASH_ROTATE: './rotate.sh',
-    VENTILATOR_BASH_SPEED: './speed.sh',
-    VENTILATOR_STANDBY_TIMEOUT_MS: standbyTimeoutMs,
+  return new FanConfiguration({
+    FAN_SCRIPT_DIR: '/tmp',
+    FAN_BASH_START: './on_off.sh',
+    FAN_BASH_STOP: './stop.sh',
+    FAN_BASH_ROTATE: './rotate.sh',
+    FAN_BASH_SPEED: './speed.sh',
+    FAN_STANDBY_TIMEOUT_MS: standbyTimeoutMs,
   });
 }
 
 test('does not execute wakeup on first command after process start', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -53,7 +53,7 @@ test('does not execute wakeup on first command after process start', async () =>
 test('executes wakeup when eligible command reaches timeout threshold equality', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -75,7 +75,7 @@ test('executes wakeup when eligible command reaches timeout threshold equality',
 test('does not execute wakeup when timeout is reached but command is ineligible', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -93,7 +93,7 @@ test('does not execute wakeup when timeout is reached but command is ineligible'
 test('executes only rotate when rotate is ineligible after timeout', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -111,7 +111,7 @@ test('executes only rotate when rotate is ineligible after timeout', async () =>
 test('executes only start when start is ineligible after timeout', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -129,7 +129,7 @@ test('executes only start when start is ineligible after timeout', async () => {
 test('skips wakeup for consecutive eligible commands within timeout', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -147,7 +147,7 @@ test('skips wakeup for consecutive eligible commands within timeout', async () =
 test('does not execute intended command when wakeup fails', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 0;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -160,16 +160,13 @@ test('does not execute intended command when wakeup fails', async () => {
   const result = await gateway.stop(true);
 
   assert.equal(result, false);
-  assert.deepEqual(terminal.executedCommands, [
-    './rotate.sh',
-    './on_off.sh',
-  ]);
+  assert.deepEqual(terminal.executedCommands, ['./rotate.sh', './on_off.sh']);
 });
 
 test('propagates intended command failure after successful wakeup', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 0;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,
@@ -192,7 +189,7 @@ test('propagates intended command failure after successful wakeup', async () => 
 test('does not update last intended command timestamp after wakeup-only success', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 0;
-  const gateway = new VentilatorTerminalGateway(
+  const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
     () => now,

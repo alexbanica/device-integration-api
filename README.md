@@ -1,11 +1,11 @@
 # Device Integration API
 
-Device Integration API is a Node.js server project written in TypeScript that provides integration with devices such as ventilators. It contains modular components for interacting with hardware, managing configurations, and running operations through a RESTful API.
+Device Integration API is a Node.js server project written in TypeScript that provides integration with devices such as fans. It contains modular components for interacting with hardware, managing configurations, and running operations through a RESTful API.
 
 ## Features
 - Modular architecture.
 - Written using modern TypeScript and Express.js.
-- Supports device-specific configurations (e.g., ventilators).
+- Supports device-specific configurations (e.g., fans).
 - REST API for external integrations.
 - Shell command execution for device operations.
 - Dockerized deployment for containerized environments.
@@ -24,7 +24,7 @@ Device Integration API is a Node.js server project written in TypeScript that pr
 ---
 
 ## Architecture and Spec Workflow
-- Source modules are separated under `src` by package (`common`, `ventilator`, and future device packages).
+- Source modules are separated under `src` by package (`common`, `fan`, and future device packages).
 - All implementation changes are spec-driven and must be approved before coding.
 - Specs are stored under `specs/`.
 - Agent and architecture conventions are tracked in `AGENTS.md`.
@@ -47,13 +47,13 @@ Device Integration API is a Node.js server project written in TypeScript that pr
    ```
 
 3. Create a `.env` file in the root directory and specify environment variables. (Refer to `.env` for the required variables.)
-Required ventilator variables:
-   - `VENTILATOR_SCRIPT_DIR`
-   - `VENTILATOR_BASH_START`
-   - `VENTILATOR_BASH_STOP`
-   - `VENTILATOR_BASH_ROTATE`
-   - `VENTILATOR_BASH_SPEED`
-   - `VENTILATOR_STANDBY_TIMEOUT_MS` (optional, milliseconds, integer, `>= 0`, default `60000`)
+Required fan variables:
+   - `FAN_SCRIPT_DIR`
+   - `FAN_BASH_START`
+   - `FAN_BASH_STOP`
+   - `FAN_BASH_ROTATE`
+   - `FAN_BASH_SPEED`
+   - `FAN_STANDBY_TIMEOUT_MS` (optional, milliseconds, integer, `>= 0`, default `60000`)
 
 ---
 

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VentilatorService } from '../../../src/ventilator/services/VentilatorService';
-import { VentilatorTerminalGatewayInterface } from '../../../src/ventilator/infrastructures/VentilatorTerminalGatewayInterface';
+import { FanService } from '../../../src/fan/services/FanService';
+import { FanTerminalGatewayInterface } from '../../../src/fan/infrastructures/FanTerminalGatewayInterface';
 
-class VentilatorTerminalGatewayStub implements VentilatorTerminalGatewayInterface {
+class FanTerminalGatewayStub implements FanTerminalGatewayInterface {
   public startCalls: boolean[] = [];
   public stopCalls: boolean[] = [];
   public rotateCalls: boolean[] = [];
@@ -42,8 +42,8 @@ class VentilatorTerminalGatewayStub implements VentilatorTerminalGatewayInterfac
 }
 
 test('start is idempotent when already on', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.start();
   await service.start();
@@ -55,9 +55,9 @@ test('start is idempotent when already on', async () => {
   assert.equal(state.isRotating, false);
 });
 
-test('setSpeed auto-starts when ventilator is off', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+test('setSpeed auto-starts when fan is off', async () => {
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.setSpeed(3);
 
@@ -71,8 +71,8 @@ test('setSpeed auto-starts when ventilator is off', async () => {
 });
 
 test('setSpeed uses circular increase steps', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.start();
   await service.setSpeed(3);
@@ -86,8 +86,8 @@ test('setSpeed uses circular increase steps', async () => {
 });
 
 test('rotate keeps rotating false when device is off', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.rotate();
 
@@ -96,8 +96,8 @@ test('rotate keeps rotating false when device is off', async () => {
 });
 
 test('rotate sets rotating true when device is on', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.start();
   await service.rotate();
@@ -107,8 +107,8 @@ test('rotate sets rotating true when device is on', async () => {
 });
 
 test('stop is idempotent when already off', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.stop();
 
@@ -117,8 +117,8 @@ test('stop is idempotent when already off', async () => {
 });
 
 test('stop while on marks stop command wakeup eligible', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
-  const service = new VentilatorService(gateway);
+  const gateway = new FanTerminalGatewayStub();
+  const service = new FanService(gateway);
 
   await service.start();
   await service.stop();
@@ -128,23 +128,23 @@ test('stop while on marks stop command wakeup eligible', async () => {
 });
 
 test('throws when speed change cannot execute all required steps', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
+  const gateway = new FanTerminalGatewayStub();
   gateway.increaseSpeedResult = 1;
-  const service = new VentilatorService(gateway);
+  const service = new FanService(gateway);
 
   await service.start();
 
   await assert.rejects(() => service.setSpeed(3), {
-    message: 'Ventilator failed to reach requested speed',
+    message: 'Fan failed to reach requested speed',
   });
 });
 
 test('throws when start command fails', async () => {
-  const gateway = new VentilatorTerminalGatewayStub();
+  const gateway = new FanTerminalGatewayStub();
   gateway.startResult = false;
-  const service = new VentilatorService(gateway);
+  const service = new FanService(gateway);
 
   await assert.rejects(() => service.start(), {
-    message: 'Ventilator failed to start',
+    message: 'Fan failed to start',
   });
 });

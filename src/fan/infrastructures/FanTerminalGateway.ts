@@ -1,16 +1,16 @@
-import { VentilatorConfiguration } from '../configurations/VentilatorConfiguration';
+import { FanConfiguration } from '../configurations/FanConfiguration';
 import { TerminalExecutorInterface } from '../../common/infrastructures/TerminalExecutorInterface';
-import { VentilatorTerminalGatewayInterface } from './VentilatorTerminalGatewayInterface';
+import { FanTerminalGatewayInterface } from './FanTerminalGatewayInterface';
 
-export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInterface {
+export class FanTerminalGateway implements FanTerminalGatewayInterface {
   private readonly terminal: TerminalExecutorInterface;
-  private readonly configuration: VentilatorConfiguration;
+  private readonly configuration: FanConfiguration;
   private readonly currentTimeProvider: () => number;
   private lastSuccessfulCommandTimestampMs?: number;
 
   constructor(
     terminal: TerminalExecutorInterface,
-    configuration: VentilatorConfiguration,
+    configuration: FanConfiguration,
     currentTimeProvider: () => number = () => Date.now(),
   ) {
     this.terminal = terminal;
@@ -20,21 +20,21 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
 
   public async start(isWakeupEligible: boolean): Promise<boolean> {
     return this.executeIntendedCommand(
-      this.configuration.ventilatorStartCommand,
+      this.configuration.fanStartCommand,
       isWakeupEligible,
     );
   }
 
   public async stop(isWakeupEligible: boolean): Promise<boolean> {
     return this.executeIntendedCommand(
-      this.configuration.ventilatorStopCommand,
+      this.configuration.fanStopCommand,
       isWakeupEligible,
     );
   }
 
   public async rotate(isWakeupEligible: boolean): Promise<boolean> {
     return this.executeIntendedCommand(
-      this.configuration.ventilatorRotateCommand,
+      this.configuration.fanRotateCommand,
       isWakeupEligible,
     );
   }
@@ -46,7 +46,7 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
     let successfulSteps = 0;
     for (let step = 0; step < steps; step++) {
       const isExecuted = await this.executeIntendedCommand(
-        this.configuration.ventilatorSpeedCommand,
+        this.configuration.fanSpeedCommand,
         isWakeupEligible,
       );
       if (!isExecuted) {
@@ -63,7 +63,7 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
   ): Promise<boolean> {
     if (isWakeupEligible && this.shouldExecuteWakeup()) {
       const isWakeupExecuted = await this.execute(
-        this.configuration.ventilatorStartCommand,
+        this.configuration.fanStartCommand,
       );
       if (!isWakeupExecuted) {
         return false;
@@ -85,13 +85,13 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
 
     const elapsedMs =
       this.currentTimeProvider() - this.lastSuccessfulCommandTimestampMs;
-    return elapsedMs >= this.configuration.ventilatorStandbyTimeoutMs;
+    return elapsedMs >= this.configuration.fanStandbyTimeoutMs;
   }
 
   private async execute(command: string): Promise<boolean> {
     const result = await this.terminal.execute(
       command,
-      this.configuration.ventilatorWorkingDirectory,
+      this.configuration.fanWorkingDirectory,
     );
     return result === 0;
   }

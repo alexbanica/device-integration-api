@@ -1,4 +1,4 @@
-export interface VentilatorTerminalGatewayInterface {
+export interface FanTerminalGatewayInterface {
   start(isWakeupEligible: boolean): Promise<boolean>;
   stop(isWakeupEligible: boolean): Promise<boolean>;
   rotate(isWakeupEligible: boolean): Promise<boolean>;
