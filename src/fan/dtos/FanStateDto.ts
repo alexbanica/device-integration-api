@@ -1,4 +1,4 @@
-export class VentilatorStateDto {
+export class FanStateDto {
   public isOn: boolean;
   public speed: number;
   public isRotating: boolean;

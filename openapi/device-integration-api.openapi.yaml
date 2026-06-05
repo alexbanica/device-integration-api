@@ -14,43 +14,43 @@ paths:
           description: Application is healthy
         '503':
           description: Dependency is down
-  /api/v1/ventilator/state:
+  /api/v1/fan/state:
     get:
-      summary: Get ventilator state
+      summary: Get fan state
       responses:
         '200':
-          description: Current ventilator state
+          description: Current fan state
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VentilatorState'
-  /api/v1/ventilator/start:
+                $ref: '#/components/schemas/FanState'
+  /api/v1/fan/start:
     post:
-      summary: Start ventilator
+      summary: Start fan
       responses:
         '202':
           description: Command accepted
         '500':
           description: Command failed
-  /api/v1/ventilator/stop:
+  /api/v1/fan/stop:
     post:
-      summary: Stop ventilator
+      summary: Stop fan
       responses:
         '202':
           description: Command accepted
         '500':
           description: Command failed
-  /api/v1/ventilator/rotate:
+  /api/v1/fan/rotate:
     post:
-      summary: Toggle ventilator rotation
+      summary: Toggle fan rotation
       responses:
         '202':
           description: Command accepted
         '500':
           description: Command failed
-  /api/v1/ventilator/speed/{speed}:
+  /api/v1/fan/speed/{speed}:
     put:
-      summary: Set ventilator speed
+      summary: Set fan speed
       parameters:
         - name: speed
           in: path
@@ -68,7 +68,7 @@ paths:
           description: Command failed
 components:
   schemas:
-    VentilatorState:
+    FanState:
       type: object
       required:
         - isOn

@@ -1,15 +1,15 @@
-import { VentilatorStateDto } from '../dtos/VentilatorStateDto';
-import { VentilatorTerminalGatewayInterface } from '../infrastructures/VentilatorTerminalGatewayInterface';
-import { VentilatorServiceInterface } from './VentilatorServiceInterface';
+import { FanStateDto } from '../dtos/FanStateDto';
+import { FanTerminalGatewayInterface } from '../infrastructures/FanTerminalGatewayInterface';
+import { FanServiceInterface } from './FanServiceInterface';
 
-export class VentilatorService implements VentilatorServiceInterface {
+export class FanService implements FanServiceInterface {
   private static readonly MAX_SPEED = 3;
-  private readonly terminalGateway: VentilatorTerminalGatewayInterface;
-  private readonly state: VentilatorStateDto;
+  private readonly terminalGateway: FanTerminalGatewayInterface;
+  private readonly state: FanStateDto;
 
-  constructor(terminalGateway: VentilatorTerminalGatewayInterface) {
+  constructor(terminalGateway: FanTerminalGatewayInterface) {
     this.terminalGateway = terminalGateway;
-    this.state = new VentilatorStateDto();
+    this.state = new FanStateDto();
   }
 
   public async start(): Promise<void> {
@@ -19,7 +19,7 @@ export class VentilatorService implements VentilatorServiceInterface {
 
     const isExecuted = await this.terminalGateway.start(false);
     if (!isExecuted) {
-      throw new Error('Ventilator failed to start');
+      throw new Error('Fan failed to start');
     }
 
     this.state.isOn = true;
@@ -34,7 +34,7 @@ export class VentilatorService implements VentilatorServiceInterface {
 
     const isExecuted = await this.terminalGateway.stop(true);
     if (!isExecuted) {
-      throw new Error('Ventilator failed to stop');
+      throw new Error('Fan failed to stop');
     }
 
     this.state.isOn = false;
@@ -45,15 +45,15 @@ export class VentilatorService implements VentilatorServiceInterface {
   public async rotate(): Promise<void> {
     const isExecuted = await this.terminalGateway.rotate(this.state.isOn);
     if (!isExecuted) {
-      throw new Error('Ventilator failed to rotate');
+      throw new Error('Fan failed to rotate');
     }
 
     this.state.isRotating = this.state.isOn;
   }
 
   public async setSpeed(desiredSpeed: number): Promise<void> {
-    if (desiredSpeed < 0 || desiredSpeed > VentilatorService.MAX_SPEED) {
-      throw new Error('Ventilator speed must be between 0 and 3');
+    if (desiredSpeed < 0 || desiredSpeed > FanService.MAX_SPEED) {
+      throw new Error('Fan speed must be between 0 and 3');
     }
 
     if (desiredSpeed === 0) {
@@ -73,20 +73,20 @@ export class VentilatorService implements VentilatorServiceInterface {
     const requiredSteps =
       desiredSpeed > currentSpeed
         ? desiredSpeed - currentSpeed
-        : VentilatorService.MAX_SPEED - currentSpeed + desiredSpeed;
+        : FanService.MAX_SPEED - currentSpeed + desiredSpeed;
 
     const actualSteps = await this.terminalGateway.increaseSpeed(
       requiredSteps,
       this.state.isOn,
     );
     if (actualSteps !== requiredSteps) {
-      throw new Error('Ventilator failed to reach requested speed');
+      throw new Error('Fan failed to reach requested speed');
     }
 
     this.state.speed = desiredSpeed;
   }
 
-  public getState(): VentilatorStateDto {
+  public getState(): FanStateDto {
     return this.state;
   }
 }

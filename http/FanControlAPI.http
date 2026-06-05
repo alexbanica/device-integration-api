@@ -1,0 +1,23 @@
+### Start Fan
+POST {{host}}/api/v1/fan/start
+Accept: application/json
+
+###
+
+### Stop Fan
+POST {{host}}/api/v1/fan/stop
+Accept: application/json
+
+###
+
+### Set Fan Speed
+PUT {{host}}/api/v1/fan/speed/3
+Accept: application/json
+
+### Rotate Fan
+POST {{host}}/api/v1/fan/rotate
+Accept: application/json
+
+### Get the state
+GET {{host}}/api/v1/fan/state
+Accept: application/json
