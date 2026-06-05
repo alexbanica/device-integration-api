@@ -1,6 +1,6 @@
 export interface VentilatorTerminalGatewayInterface {
-  start(): Promise<boolean>;
-  stop(): Promise<boolean>;
-  rotate(): Promise<boolean>;
-  increaseSpeed(steps: number): Promise<number>;
+  start(isWakeupEligible: boolean): Promise<boolean>;
+  stop(isWakeupEligible: boolean): Promise<boolean>;
+  rotate(isWakeupEligible: boolean): Promise<boolean>;
+  increaseSpeed(steps: number, isWakeupEligible: boolean): Promise<number>;
 }

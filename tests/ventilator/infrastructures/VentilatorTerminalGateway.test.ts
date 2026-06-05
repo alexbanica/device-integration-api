@@ -44,13 +44,13 @@ test('does not execute wakeup on first command after process start', async () =>
     () => now,
   );
 
-  const result = await gateway.stop();
+  const result = await gateway.stop(true);
 
   assert.equal(result, true);
   assert.deepEqual(terminal.executedCommands, ['./stop.sh']);
 });
 
-test('executes wakeup when timeout is reached by threshold equality', async () => {
+test('executes wakeup when eligible command reaches timeout threshold equality', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
   const gateway = new VentilatorTerminalGateway(
@@ -59,10 +59,10 @@ test('executes wakeup when timeout is reached by threshold equality', async () =
     () => now,
   );
 
-  await gateway.rotate();
+  await gateway.rotate(true);
   now = 1100;
 
-  const result = await gateway.stop();
+  const result = await gateway.stop(true);
 
   assert.equal(result, true);
   assert.deepEqual(terminal.executedCommands, [
@@ -72,7 +72,7 @@ test('executes wakeup when timeout is reached by threshold equality', async () =
   ]);
 });
 
-test('skips wakeup for consecutive commands within timeout', async () => {
+test('does not execute wakeup when timeout is reached but command is ineligible', async () => {
   const terminal = new TerminalExecutorStub();
   let now = 100;
   const gateway = new VentilatorTerminalGateway(
@@ -81,10 +81,64 @@ test('skips wakeup for consecutive commands within timeout', async () => {
     () => now,
   );
 
-  await gateway.start();
+  await gateway.rotate(true);
+  now = 1100;
+
+  const result = await gateway.stop(false);
+
+  assert.equal(result, true);
+  assert.deepEqual(terminal.executedCommands, ['./rotate.sh', './stop.sh']);
+});
+
+test('executes only rotate when rotate is ineligible after timeout', async () => {
+  const terminal = new TerminalExecutorStub();
+  let now = 100;
+  const gateway = new VentilatorTerminalGateway(
+    terminal,
+    buildConfiguration('1000'),
+    () => now,
+  );
+
+  await gateway.start(false);
+  now = 1100;
+
+  const result = await gateway.rotate(false);
+
+  assert.equal(result, true);
+  assert.deepEqual(terminal.executedCommands, ['./on_off.sh', './rotate.sh']);
+});
+
+test('executes only start when start is ineligible after timeout', async () => {
+  const terminal = new TerminalExecutorStub();
+  let now = 100;
+  const gateway = new VentilatorTerminalGateway(
+    terminal,
+    buildConfiguration('1000'),
+    () => now,
+  );
+
+  await gateway.rotate(true);
+  now = 1100;
+
+  const result = await gateway.start(false);
+
+  assert.equal(result, true);
+  assert.deepEqual(terminal.executedCommands, ['./rotate.sh', './on_off.sh']);
+});
+
+test('skips wakeup for consecutive eligible commands within timeout', async () => {
+  const terminal = new TerminalExecutorStub();
+  let now = 100;
+  const gateway = new VentilatorTerminalGateway(
+    terminal,
+    buildConfiguration('1000'),
+    () => now,
+  );
+
+  await gateway.start(false);
   now = 500;
 
-  const result = await gateway.rotate();
+  const result = await gateway.rotate(true);
 
   assert.equal(result, true);
   assert.deepEqual(terminal.executedCommands, ['./on_off.sh', './rotate.sh']);
@@ -99,11 +153,11 @@ test('does not execute intended command when wakeup fails', async () => {
     () => now,
   );
 
-  await gateway.rotate();
+  await gateway.rotate(true);
   now = 1000;
   terminal.results.push(1);
 
-  const result = await gateway.stop();
+  const result = await gateway.stop(true);
 
   assert.equal(result, false);
   assert.deepEqual(terminal.executedCommands, [
@@ -121,15 +175,42 @@ test('propagates intended command failure after successful wakeup', async () => 
     () => now,
   );
 
-  await gateway.rotate();
+  await gateway.rotate(true);
   now = 1000;
   terminal.results.push(0, 1);
 
-  const result = await gateway.stop();
+  const result = await gateway.stop(true);
 
   assert.equal(result, false);
   assert.deepEqual(terminal.executedCommands, [
     './rotate.sh',
+    './on_off.sh',
+    './stop.sh',
+  ]);
+});
+
+test('does not update last intended command timestamp after wakeup-only success', async () => {
+  const terminal = new TerminalExecutorStub();
+  let now = 0;
+  const gateway = new VentilatorTerminalGateway(
+    terminal,
+    buildConfiguration('1000'),
+    () => now,
+  );
+
+  await gateway.rotate(true);
+  now = 1000;
+  terminal.results.push(0, 1, 0, 0);
+
+  const firstResult = await gateway.stop(true);
+  const secondResult = await gateway.stop(true);
+
+  assert.equal(firstResult, false);
+  assert.equal(secondResult, true);
+  assert.deepEqual(terminal.executedCommands, [
+    './rotate.sh',
+    './on_off.sh',
+    './stop.sh',
     './on_off.sh',
     './stop.sh',
   ]);
