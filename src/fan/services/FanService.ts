@@ -1,15 +1,23 @@
 import { FanStateDto } from '../dtos/FanStateDto';
 import { FanTerminalGatewayInterface } from '../infrastructures/FanTerminalGatewayInterface';
 import { FanServiceInterface } from './FanServiceInterface';
+import { FanStateStoreInterface } from './FanStateStoreInterface';
+import { FanStateValidator } from './FanStateValidator';
 
 export class FanService implements FanServiceInterface {
   private static readonly MAX_SPEED = 3;
   private readonly terminalGateway: FanTerminalGatewayInterface;
+  private readonly stateStore: FanStateStoreInterface;
   private readonly state: FanStateDto;
 
-  constructor(terminalGateway: FanTerminalGatewayInterface) {
+  constructor(
+    terminalGateway: FanTerminalGatewayInterface,
+    stateStore: FanStateStoreInterface,
+    initialState: FanStateDto = FanStateValidator.defaultState(),
+  ) {
     this.terminalGateway = terminalGateway;
-    this.state = new FanStateDto();
+    this.stateStore = stateStore;
+    this.state = FanStateValidator.clone(initialState);
   }
 
   public async start(): Promise<void> {
@@ -25,6 +33,7 @@ export class FanService implements FanServiceInterface {
     this.state.isOn = true;
     this.state.speed = 1;
     this.state.isRotating = false;
+    await this.saveState();
   }
 
   public async stop(): Promise<void> {
@@ -40,6 +49,7 @@ export class FanService implements FanServiceInterface {
     this.state.isOn = false;
     this.state.speed = 0;
     this.state.isRotating = false;
+    await this.saveState();
   }
 
   public async rotate(): Promise<void> {
@@ -48,7 +58,13 @@ export class FanService implements FanServiceInterface {
       throw new Error('Fan failed to rotate');
     }
 
-    this.state.isRotating = this.state.isOn;
+    const nextIsRotating = this.state.isOn;
+    if (this.state.isRotating === nextIsRotating) {
+      return;
+    }
+
+    this.state.isRotating = nextIsRotating;
+    await this.saveState();
   }
 
   public async setSpeed(desiredSpeed: number): Promise<void> {
@@ -84,9 +100,14 @@ export class FanService implements FanServiceInterface {
     }
 
     this.state.speed = desiredSpeed;
+    await this.saveState();
   }
 
   public getState(): FanStateDto {
-    return this.state;
+    return FanStateValidator.clone(this.state);
+  }
+
+  private async saveState(): Promise<void> {
+    await this.stateStore.save(this.state);
   }
 }

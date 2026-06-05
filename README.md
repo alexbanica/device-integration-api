@@ -54,6 +54,7 @@ Required fan variables:
    - `FAN_BASH_ROTATE`
    - `FAN_BASH_SPEED`
    - `FAN_STANDBY_TIMEOUT_MS` (optional, milliseconds, integer, `>= 0`, default `60000`)
+   - `FAN_STATE_FILE_PATH` (optional, default `./state/fan-state.json`)
 
 ---
 
@@ -97,9 +98,13 @@ Key `npm` scripts included in this project:
 
 2. Ensure `pigpiod` is already running on the host and reachable on `localhost:8888`.
 
-3. Run the Docker container with host networking:
+3. Run the Docker container with host networking and a mounted fan state volume:
    ```bash
-   docker run --network host -d device-integration-api:<RELEASE_TAG>
+   docker volume create device-integration-api-state
+   docker run \
+     --network host \
+     -v device-integration-api-state:/app/state \
+     -d device-integration-api:<RELEASE_TAG>
    ```
 
 4. Access the application in your browser:

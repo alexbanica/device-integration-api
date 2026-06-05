@@ -33,9 +33,12 @@ COPY docker-entrypoint.sh /usr/local/bin/
 
 RUN apk add --no-cache python3 py3-pip su-exec && \
     pip3 install pigpio
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    mkdir -p /app/state && \
+    chown -R node:node /app/state
 
 EXPOSE 3000
+VOLUME ["/app/state"]
 
 ENV NODE_ENV=production
 USER node

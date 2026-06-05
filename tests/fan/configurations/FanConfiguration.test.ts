@@ -10,6 +10,7 @@ test('creates fan configuration when all env vars are present', () => {
     FAN_BASH_ROTATE: './rotate.sh',
     FAN_BASH_SPEED: './speed.sh',
     FAN_STANDBY_TIMEOUT_MS: '30000',
+    FAN_STATE_FILE_PATH: '/tmp/fan-state.json',
   });
 
   assert.equal(configuration.fanWorkingDirectory, '/tmp');
@@ -18,6 +19,7 @@ test('creates fan configuration when all env vars are present', () => {
   assert.equal(configuration.fanRotateCommand, './rotate.sh');
   assert.equal(configuration.fanSpeedCommand, './speed.sh');
   assert.equal(configuration.fanStandbyTimeoutMs, 30000);
+  assert.equal(configuration.fanStateFilePath, '/tmp/fan-state.json');
 });
 
 test('throws when mandatory env var is missing', () => {
@@ -61,6 +63,18 @@ test('uses default standby timeout when env var is missing', () => {
   });
 
   assert.equal(configuration.fanStandbyTimeoutMs, 60000);
+});
+
+test('uses default state file path when env var is missing', () => {
+  const configuration = new FanConfiguration({
+    FAN_SCRIPT_DIR: '/tmp',
+    FAN_BASH_START: './start.sh',
+    FAN_BASH_STOP: './stop.sh',
+    FAN_BASH_ROTATE: './rotate.sh',
+    FAN_BASH_SPEED: './speed.sh',
+  });
+
+  assert.equal(configuration.fanStateFilePath, './state/fan-state.json');
 });
 
 test('throws when standby timeout env var is not an integer', () => {
