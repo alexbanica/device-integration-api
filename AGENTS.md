@@ -58,3 +58,4 @@
 - Historical approved spec retained without rewrite: `SPEC-003 - Ventilator Standby Wakeup` (`specs/SPEC-003-ventilator-standby-wakeup.md`, status: Approved, date: 2026-03-01)
 - Historical approved spec retained without rewrite: `SPEC-004 - Ventilator Standby Wakeup State Gate` (`specs/SPEC-004-ventilator-standby-wakeup-state-gate.md`, status: Approved, date: 2026-06-05)
 - `SPEC-005 - Fan Naming Alignment` (`specs/SPEC-005-fan-naming-alignment.md`, status: Approved, date: 2026-06-05)
+- `SPEC-006 - Fan State Persistence` (`specs/SPEC-006-fan-state-persistence.md`, status: Approved, date: 2026-06-05)

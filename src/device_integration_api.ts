@@ -8,13 +8,18 @@ dotenv.config();
 const PORT = process.env.NPM_SERVER_PORT || 3000;
 const app = express();
 
-function register_modules(app: Express) {
+async function register_modules(app: Express): Promise<void> {
   register_common_module(app);
-  register_fan_module(app, process.env);
+  await register_fan_module(app, process.env);
 }
 
-register_modules(app);
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+register_modules(app)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error: Error) => {
+    console.error(error.message);
+    process.exit(1);
+  });

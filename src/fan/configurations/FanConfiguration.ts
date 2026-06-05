@@ -3,12 +3,14 @@ import { FanConfigurationError } from './FanConfigurationError';
 
 export class FanConfiguration {
   private static readonly DEFAULT_STANDBY_TIMEOUT_MS = 60000;
+  private static readonly DEFAULT_STATE_FILE_PATH = './state/fan-state.json';
   private readonly _fanWorkingDirectory: string;
   private readonly _fanStartCommand: string;
   private readonly _fanStopCommand: string;
   private readonly _fanRotateCommand: string;
   private readonly _fanSpeedCommand: string;
   private readonly _fanStandbyTimeoutMs: number;
+  private readonly _fanStateFilePath: string;
 
   constructor(env: Dict<string>) {
     this._fanWorkingDirectory = env.FAN_SCRIPT_DIR || '';
@@ -20,6 +22,8 @@ export class FanConfiguration {
       env.FAN_STANDBY_TIMEOUT_MS === undefined
         ? FanConfiguration.DEFAULT_STANDBY_TIMEOUT_MS
         : Number.parseInt(env.FAN_STANDBY_TIMEOUT_MS, 10);
+    this._fanStateFilePath =
+      env.FAN_STATE_FILE_PATH || FanConfiguration.DEFAULT_STATE_FILE_PATH;
     this.validateConfiguration();
   }
 
@@ -73,5 +77,9 @@ export class FanConfiguration {
 
   get fanStandbyTimeoutMs(): number {
     return this._fanStandbyTimeoutMs;
+  }
+
+  get fanStateFilePath(): string {
+    return this._fanStateFilePath;
   }
 }
