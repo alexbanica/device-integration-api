@@ -17,7 +17,7 @@ export class VentilatorService implements VentilatorServiceInterface {
       return;
     }
 
-    const isExecuted = await this.terminalGateway.start();
+    const isExecuted = await this.terminalGateway.start(false);
     if (!isExecuted) {
       throw new Error('Ventilator failed to start');
     }
@@ -32,7 +32,7 @@ export class VentilatorService implements VentilatorServiceInterface {
       return;
     }
 
-    const isExecuted = await this.terminalGateway.stop();
+    const isExecuted = await this.terminalGateway.stop(true);
     if (!isExecuted) {
       throw new Error('Ventilator failed to stop');
     }
@@ -43,7 +43,7 @@ export class VentilatorService implements VentilatorServiceInterface {
   }
 
   public async rotate(): Promise<void> {
-    const isExecuted = await this.terminalGateway.rotate();
+    const isExecuted = await this.terminalGateway.rotate(this.state.isOn);
     if (!isExecuted) {
       throw new Error('Ventilator failed to rotate');
     }
@@ -75,7 +75,10 @@ export class VentilatorService implements VentilatorServiceInterface {
         ? desiredSpeed - currentSpeed
         : VentilatorService.MAX_SPEED - currentSpeed + desiredSpeed;
 
-    const actualSteps = await this.terminalGateway.increaseSpeed(requiredSteps);
+    const actualSteps = await this.terminalGateway.increaseSpeed(
+      requiredSteps,
+      this.state.isOn,
+    );
     if (actualSteps !== requiredSteps) {
       throw new Error('Ventilator failed to reach requested speed');
     }

@@ -18,23 +18,36 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
     this.currentTimeProvider = currentTimeProvider;
   }
 
-  public async start(): Promise<boolean> {
-    return this.executeIntendedCommand(this.configuration.ventilatorStartCommand);
+  public async start(isWakeupEligible: boolean): Promise<boolean> {
+    return this.executeIntendedCommand(
+      this.configuration.ventilatorStartCommand,
+      isWakeupEligible,
+    );
   }
 
-  public async stop(): Promise<boolean> {
-    return this.executeIntendedCommand(this.configuration.ventilatorStopCommand);
+  public async stop(isWakeupEligible: boolean): Promise<boolean> {
+    return this.executeIntendedCommand(
+      this.configuration.ventilatorStopCommand,
+      isWakeupEligible,
+    );
   }
 
-  public async rotate(): Promise<boolean> {
-    return this.executeIntendedCommand(this.configuration.ventilatorRotateCommand);
+  public async rotate(isWakeupEligible: boolean): Promise<boolean> {
+    return this.executeIntendedCommand(
+      this.configuration.ventilatorRotateCommand,
+      isWakeupEligible,
+    );
   }
 
-  public async increaseSpeed(steps: number): Promise<number> {
+  public async increaseSpeed(
+    steps: number,
+    isWakeupEligible: boolean,
+  ): Promise<number> {
     let successfulSteps = 0;
     for (let step = 0; step < steps; step++) {
       const isExecuted = await this.executeIntendedCommand(
         this.configuration.ventilatorSpeedCommand,
+        isWakeupEligible,
       );
       if (!isExecuted) {
         return successfulSteps;
@@ -44,8 +57,11 @@ export class VentilatorTerminalGateway implements VentilatorTerminalGatewayInter
     return successfulSteps;
   }
 
-  private async executeIntendedCommand(command: string): Promise<boolean> {
-    if (this.shouldExecuteWakeup()) {
+  private async executeIntendedCommand(
+    command: string,
+    isWakeupEligible: boolean,
+  ): Promise<boolean> {
+    if (isWakeupEligible && this.shouldExecuteWakeup()) {
       const isWakeupExecuted = await this.execute(
         this.configuration.ventilatorStartCommand,
       );
