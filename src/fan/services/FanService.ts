@@ -52,6 +52,14 @@ export class FanService implements FanServiceInterface {
     await this.saveState();
   }
 
+  public async reset(): Promise<void> {
+    const defaultState = FanStateValidator.defaultState();
+    this.state.isOn = defaultState.isOn;
+    this.state.speed = defaultState.speed;
+    this.state.isRotating = defaultState.isRotating;
+    await this.saveState();
+  }
+
   public async rotate(): Promise<void> {
     const isExecuted = await this.terminalGateway.rotate(this.state.isOn);
     if (!isExecuted) {

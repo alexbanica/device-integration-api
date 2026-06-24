@@ -45,12 +45,17 @@ class FanTerminalGatewayStub implements FanTerminalGatewayInterface {
 
 class FanStateStoreStub implements FanStateStoreInterface {
   public savedStates: FanStateDto[] = [];
+  public saveError: Error | null = null;
 
   public async load(): Promise<FanStateDto> {
     throw new Error('load is not used by FanService tests');
   }
 
   public async save(state: FanStateDto): Promise<void> {
+    if (this.saveError) {
+      throw this.saveError;
+    }
+
     const savedState = new FanStateDto();
     savedState.isOn = state.isOn;
     savedState.speed = state.speed;
@@ -242,5 +247,66 @@ test('does not save when speed validation fails', async () => {
   await assert.rejects(() => service.setSpeed(4), {
     message: 'Fan speed must be between 0 and 3',
   });
+  assert.deepEqual(stateStore.savedStates, []);
+});
+
+test('reset from ON state sets state to default OFF and saves default OFF state', async () => {
+  const gateway = new FanTerminalGatewayStub();
+  const stateStore = new FanStateStoreStub();
+  const service = new FanService(gateway, stateStore, createOnState(3, true));
+
+  await service.reset();
+
+  assert.deepEqual(gateway.startCalls, []);
+  assert.deepEqual(gateway.stopCalls, []);
+  assert.deepEqual(gateway.rotateCalls, []);
+  assert.deepEqual(gateway.increaseSpeedCalls, []);
+  assert.deepEqual(stateStore.savedStates, [new FanStateDto()]);
+  assert.equal(service.getState().isOn, false);
+  assert.equal(service.getState().speed, 0);
+  assert.equal(service.getState().isRotating, false);
+});
+
+test('reset from default OFF state still saves default OFF state', async () => {
+  const gateway = new FanTerminalGatewayStub();
+  const stateStore = new FanStateStoreStub();
+  const service = new FanService(gateway, stateStore, new FanStateDto());
+
+  await service.reset();
+
+  assert.deepEqual(gateway.startCalls, []);
+  assert.deepEqual(gateway.stopCalls, []);
+  assert.deepEqual(gateway.rotateCalls, []);
+  assert.deepEqual(gateway.increaseSpeedCalls, []);
+  assert.deepEqual(stateStore.savedStates, [new FanStateDto()]);
+});
+
+test('reset does not call terminal commands', async () => {
+  const gateway = new FanTerminalGatewayStub();
+  const stateStore = new FanStateStoreStub();
+  const service = new FanService(gateway, stateStore, createOnState(2, true));
+
+  await service.reset();
+
+  assert.deepEqual(gateway.startCalls, []);
+  assert.deepEqual(gateway.stopCalls, []);
+  assert.deepEqual(gateway.rotateCalls, []);
+  assert.deepEqual(gateway.increaseSpeedCalls, []);
+  assert.deepEqual(stateStore.savedStates, [new FanStateDto()]);
+});
+
+test('reset propagates state-store save failures', async () => {
+  const gateway = new FanTerminalGatewayStub();
+  const stateStore = new FanStateStoreStub();
+  stateStore.saveError = new Error('State store not available');
+  const service = new FanService(gateway, stateStore, createOnState(2, true));
+
+  await assert.rejects(() => service.reset(), {
+    message: 'State store not available',
+  });
+  assert.deepEqual(gateway.startCalls, []);
+  assert.deepEqual(gateway.stopCalls, []);
+  assert.deepEqual(gateway.rotateCalls, []);
+  assert.deepEqual(gateway.increaseSpeedCalls, []);
   assert.deepEqual(stateStore.savedStates, []);
 });

@@ -32,6 +32,14 @@ paths:
           description: Command accepted
         '500':
           description: Command failed
+  /api/v1/fan/reset:
+    post:
+      summary: Reset fan to default state
+      responses:
+        '202':
+          description: Command accepted
+        '500':
+          description: Command failed
   /api/v1/fan/stop:
     post:
       summary: Stop fan

@@ -29,6 +29,15 @@ export class FanController {
         );
     });
 
+    this.app.post('/api/v1/fan/reset', (req: Request, res: Response) => {
+      this.fanService
+        .reset()
+        .then(() => res.status(202).send())
+        .catch((error: Error) =>
+          res.status(500).send(new ErrorResponse(error.message)),
+        );
+    });
+
     this.app.post('/api/v1/fan/rotate', (req: Request, res: Response) => {
       this.fanService
         .rotate()
