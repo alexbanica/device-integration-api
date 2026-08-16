@@ -8,11 +8,12 @@
     "build": "npm run clean && tsc",
     "build:test": "tsc -p tsconfig.test.json",
     "dev": "ts-node-dev --respawn src/device_integration_api.ts",
-    "lint": "eslint '{src,tests}/**/*.{js,ts}' --fix",
+    "lint": "eslint '{src,tests}/**/*.{js,ts}'",
+    "lint:fix": "eslint '{src,tests}/**/*.{js,ts}' --fix",
     "clean": "rm -rf dist dist-tests",
     "format": "prettier --write '{src,tests}/**/*.{js,ts}'",
     "watch": "tsc --watch & nodemon dist/device_integration_api.js",
-    "test": "npm run build:test && node --test dist-tests/tests"
+    "test": "npm run build:test && files=\"$(find dist-tests/tests -type f -name '*.test.js' | sort)\" && if [ -z \"$files\" ]; then echo \"No compiled test files found under dist-tests/tests\" >&2; exit 1; fi && node --test $files"
   },
   "author": "Alex. Banica",
   "license": "MIT",
