@@ -1,26 +1,9 @@
-FROM alpine:3.15 AS downloader
-ARG GITHUB_REPO
-ARG SOURCE_REVISION
-
-RUN apk add --no-cache curl unzip
-
-RUN --mount=type=secret,id=GITHUB_AUTH \
-    set -eu; \
-    auth="$(cat /run/secrets/GITHUB_AUTH)"; \
-    curl -o src.zip -fL \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $auth" \
-            "${GITHUB_REPO}/zipball/${SOURCE_REVISION}"; \
-    unzip src.zip -d /tmp && \
-    mv /tmp/alexbanica-* /tmp/src && \
-    rm src.zip
-
 FROM node:BASE_BUILD_IMAGE_VERSION AS builder
 WORKDIR /app
-COPY --from=downloader /tmp/src ./
+COPY package*.json ./
 
 RUN npm ci --silent
+COPY . .
 RUN npm run build
 
 FROM node:BASE_IMAGE_VERSION AS runtime
@@ -29,7 +12,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY docker/docker-entrypoint.sh /usr/local/bin/
 
 RUN apk add --no-cache python3 py3-pip su-exec && \
     pip3 install pigpio

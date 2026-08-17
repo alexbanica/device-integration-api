@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+dist
+dist-tests
+coverage
+.env
+.env.*
+docker/.env
+docker/secrets
+*.key
+*.pem
+*.token
+.codex
+specs

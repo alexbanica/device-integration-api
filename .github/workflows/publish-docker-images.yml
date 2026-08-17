@@ -70,15 +70,6 @@ jobs:
 
           echo "Buildx supports linux/arm64 and linux/arm/v6"
 
-      - name: Write GitHub token file
-        id: github_token_file
-        run: |
-          set -euo pipefail
-          GITHUB_TOKEN_FILE="${{ runner.temp }}/github_token"
-          printf '%s' "${{ github.token }}" > "$GITHUB_TOKEN_FILE"
-          chmod 0600 "$GITHUB_TOKEN_FILE"
-          echo "GITHUB_TOKEN_FILE=$GITHUB_TOKEN_FILE" >> "$GITHUB_OUTPUT"
-
       - name: Log in to Forgejo container registry
         run: |
           set -euo pipefail
@@ -95,15 +86,9 @@ jobs:
           set -euo pipefail
 
           ./docker/build.sh \
-            --source-revision "${{ github.sha }}" \
             --release "${{ github.ref_name }}" \
             --registry-prefix "forgejo.alexlab.nl/alexlab" \
             --platform "linux/arm64,linux/arm/v6" \
             --push \
-            --secret-file "${{ steps.github_token_file.outputs.GITHUB_TOKEN_FILE }}" \
             --cache-from "type=gha,scope=device-integration-api-linux-arm64-armv6" \
             --cache-to "type=gha,scope=device-integration-api-linux-arm64-armv6,mode=max"
-
-      - name: Remove GitHub token file
-        if: always()
-        run: rm -f "${{ runner.temp }}/github_token"
