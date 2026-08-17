@@ -18,7 +18,9 @@ class FanServiceStub implements FanServiceInterface {
 
   public async rotate(): Promise<void> {}
 
-  public async setSpeed(_speed: number): Promise<void> {}
+  public async setSpeed(_speed: number): Promise<void> {
+    void _speed;
+  }
 
   public getState(): FanStateDto {
     return this.state;

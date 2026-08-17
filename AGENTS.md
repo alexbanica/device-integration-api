@@ -1,11 +1,13 @@
 # Project Agent Contract
 
 ## Spec-Driven Rule
+
 - No implementation without an approved spec.
 - Every behavior change must map 1:1 to a spec section.
 - If Purpose, Definitions, Behavior, Invariants, Constraints, or Assumptions are ambiguous, clarify before coding.
 
 ## Architecture
+
 - Keep modular separation by package under `src` (`common`, `fan`, and future packages).
 - Apply DDD-style layering with onion-oriented dependency direction:
   - Controllers -> Services Interfaces -> Domain/DTOs
@@ -18,6 +20,7 @@
 - DTOs represent non-persistent payload/state objects.
 
 ## Project-Specific Architecture
+
 - `src/common/controllers`: application-level REST controllers, currently health/status.
 - `src/common/controllers/responses`: shared HTTP response DTOs.
 - `src/common/dtos` and `src/common/enums`: common application state contracts.
@@ -31,6 +34,7 @@
 - Root `http/` files document and exercise controller contracts.
 
 ## Coding Rules
+
 - One class per file.
 - All package names are plural.
 - Every interface name ends with `Interface`.
@@ -38,6 +42,7 @@
 - Controllers use request/response objects in `controllers/requests` and `controllers/responses`.
 
 ## Testing and Validation
+
 - Business logic requires unit tests.
 - GitHub Actions workflow configuration does not require unit tests. Do not
   create unit tests solely for GitHub Actions changes, and remove existing
@@ -46,6 +51,7 @@
 - Build and tests must pass before completion.
 
 ## Documentation
+
 - `README.md` and `AGENTS.md` must stay current.
 - Each approved spec must be stored as a dedicated `.md` file under `specs/`.
 - `.http` files are required for each controller under `/http`.
@@ -53,10 +59,12 @@
 - Add OpenAPI event docs only when consumed/published events are introduced.
 
 ## Branching
+
 - Each spec is implemented in its own branch.
 - Do not implement specs in `main`/`master`.
 
 ## Current Active Specs
+
 - Historical approved spec retained without rewrite: `SPEC-001 - Ventilator Module Alignment` (`specs/SPEC-001-ventilator-module-alignment.md`, status: Approved, date: 2026-02-26)
 - `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`, status: Approved, date: 2026-02-26)
 - Historical approved spec retained without rewrite: `SPEC-003 - Ventilator Standby Wakeup` (`specs/SPEC-003-ventilator-standby-wakeup.md`, status: Approved, date: 2026-03-01)
@@ -64,4 +72,6 @@
 - `SPEC-005 - Fan Naming Alignment` (`specs/SPEC-005-fan-naming-alignment.md`, status: Approved, date: 2026-06-05)
 - `SPEC-006 - Fan State Persistence` (`specs/SPEC-006-fan-state-persistence.md`, status: Approved, date: 2026-06-05)
 - `SPEC-007 - Fan Reset Action` (`specs/SPEC-007-fan-reset-action.md`, status: Approved, date: 2026-06-24)
+- Historical approved spec retained without rewrite: `SPEC-008 - GitHub Actions CI And Private ARM64 And ARMv6 Image Publishing` (`specs/SPEC-008-github-actions-ci-private-arm64-image-publishing.md`, status: Approved, date: 2026-08-16)
 - `SPEC-009 - GitHub Actions Unit-Test Policy` (`specs/SPEC-009-github-actions-unit-test-policy.md`, status: Approved, date: 2026-08-17)
+- `SPEC-010 - Forgejo Visibility-Neutral ARM Publishing` (`specs/SPEC-010-forgejo-visibility-neutral-arm-publishing.md`, status: Approved, date: 2026-08-17)

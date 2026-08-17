@@ -1,0 +1,108 @@
+name: Publish ARM Images
+
+on:
+  push:
+    tags:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  publish-arm-images:
+    name: Publish ARM64 and ARMv6 image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Validate publish inputs
+        run: |
+          set -euo pipefail
+
+          if [ -z "${FORGEJO_REGISTRY_USERNAME:-}" ]; then
+            echo "Missing FORGEJO_REGISTRY_USERNAME secret" >&2
+            exit 1
+          fi
+
+          if [ -z "${FORGEJO_REGISTRY_TOKEN:-}" ]; then
+            echo "Missing FORGEJO_REGISTRY_TOKEN secret" >&2
+            exit 1
+          fi
+
+          if ! [[ "${{ github.ref_name }}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
+            echo "Ref_name is not a valid Docker tag: ${{ github.ref_name }}" >&2
+            exit 1
+          fi
+
+          REGISTRY_PREFIX="forgejo.alexlab.nl/alexlab"
+          if [ "$REGISTRY_PREFIX" != "forgejo.alexlab.nl/alexlab" ]; then
+            echo "Unexpected registry prefix: $REGISTRY_PREFIX" >&2
+            exit 1
+          fi
+
+          echo "Inputs validated"
+        env:
+          FORGEJO_REGISTRY_USERNAME: ${{ secrets.FORGEJO_REGISTRY_USERNAME }}
+          FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Verify Buildx ARM platform support
+        run: |
+          set -euo pipefail
+          if ! docker buildx inspect | grep -q 'linux/arm64'; then
+            echo "Buildx platform linux/arm64 not available" >&2
+            exit 1
+          fi
+
+          if ! docker buildx inspect | grep -q 'linux/arm/v6'; then
+            echo "Buildx platform linux/arm/v6 not available" >&2
+            exit 1
+          fi
+
+          echo "Buildx supports linux/arm64 and linux/arm/v6"
+
+      - name: Write GitHub token for build auth
+        id: github_token_file
+        run: |
+          set -euo pipefail
+          GITHUB_TOKEN_FILE="${{ runner.temp }}/github_token"
+          printf '%s' "${{ github.token }}" > "$GITHUB_TOKEN_FILE"
+          chmod 0600 "$GITHUB_TOKEN_FILE"
+          echo "GITHUB_TOKEN_FILE=$GITHUB_TOKEN_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Forgejo registry
+        run: |
+          set -euo pipefail
+          echo "${FORGEJO_REGISTRY_TOKEN}" | \
+            docker login forgejo.alexlab.nl \
+              --username "${FORGEJO_REGISTRY_USERNAME}" \
+              --password-stdin
+        env:
+          FORGEJO_REGISTRY_USERNAME: ${{ secrets.FORGEJO_REGISTRY_USERNAME }}
+          FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          set -euo pipefail
+
+          ./docker/build.sh \
+            --source-revision "${{ github.sha }}" \
+            --release "${{ github.ref_name }}" \
+            --registry-prefix "forgejo.alexlab.nl/alexlab" \
+            --platform "linux/arm64,linux/arm/v6" \
+            --push \
+            --secret-file "${{ steps.github_token_file.outputs.GITHUB_TOKEN_FILE }}" \
+            --cache-from "type=gha,scope=device-integration-api-linux-arm64-armv6" \
+            --cache-to "type=gha,scope=device-integration-api-linux-arm64-armv6,mode=max"
+
+      - name: Cleanup token file
+        if: always()
+        run: rm -f "${{ runner.temp }}/github_token"

@@ -37,7 +37,7 @@ function buildConfiguration(standbyTimeoutMs: string = '1000') {
 
 test('does not execute wakeup on first command after process start', async () => {
   const terminal = new TerminalExecutorStub();
-  let now = 100;
+  const now = 100;
   const gateway = new FanTerminalGateway(
     terminal,
     buildConfiguration('1000'),
