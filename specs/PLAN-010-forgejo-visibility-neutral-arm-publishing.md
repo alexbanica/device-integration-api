@@ -19,6 +19,8 @@ Approved
 - Invoking checkout: `/home/alexbanica/workspace/device-integration-api`
 - Delivery branch: `feature/spec-008-arm-publishing-visibility-compatible`
 - Base: pushed SPEC-008 commit `6ee8b52ef966881e503f0436830a3babbb4859e8`
+- Reconciliation input: freshly fetched `origin/main` commit
+  `6b2b5b8b4eb7d6a106803a1482812e0fbc0161f0`
 - Linked worktree: not requested and not used.
 
 ## Affected Files
@@ -41,6 +43,10 @@ Approved
    when the credentials remain authorized to write the package.
 5. Added SPEC-010 as the narrow approved override for SPEC-008 privacy
    requirements and updated the active-spec index.
+6. Merged the freshly fetched `origin/main` without committing, resolved the
+   sole `AGENTS.md` conflict by preserving the mainline GitHub Actions testing
+   policy and SPEC-009 entry together with this branch's SPEC-008 and SPEC-010
+   entries, and staged the resolved merge state.
 
 ## Validation Run
 
@@ -55,6 +61,10 @@ Approved
   and absence of the removed visibility API check.
 - Docker Hub tag metadata for `node:19.2.0-alpine3.15` and `alpine:3.15`
   confirmed active ARM64 and ARMv6 variants on 2026-08-17.
+- `git fetch origin main` refreshed `origin/main` to
+  `6b2b5b8b4eb7d6a106803a1482812e0fbc0161f0`.
+- `git merge-tree` confirmed `AGENTS.md` was the only conflicting path.
+- Conflict-marker inspection and `git diff --check` passed after resolution.
 
 ## Validation Skipped
 
@@ -77,8 +87,10 @@ Approved
 ## Staging And Delivery Status
 
 - Every accepted in-scope path is staged for Git tracking.
-- Commit: not created; not authorized by this `super-agent` invocation.
-- Push: not performed; not authorized by this `super-agent` invocation.
+- Commit: authorized by the user's follow-up; the complete staged merge result,
+  including this artifact, is delivered in one merge commit.
+- Push: authorized by the user's follow-up; the merge commit is delivered to
+  `origin/feature/spec-008-arm-publishing-visibility-compatible`.
 - Worktree attachment/cleanup: not applicable because no linked worktree was
   used.
 
@@ -89,6 +101,10 @@ Approved
   invocation.
 - Hosted runner, QEMU emulation, Forgejo authentication, registry push, and
   exact output manifest remain unverified live.
+- The merged mainline `AGENTS.md` references
+  `specs/SPEC-009-github-actions-unit-test-policy.md`, but that artifact is not
+  present in the fetched `origin/main` tree; this reconciliation preserves the
+  upstream entry without inventing or reconstructing the missing artifact.
 - Delivery is DRAFT because review, QA, hosted publication, and architecture
   runtime validation were skipped.
 - The default Definition of Done is not fully satisfied under `super-agent`.

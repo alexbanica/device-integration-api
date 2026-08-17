@@ -44,6 +44,10 @@
 ## Testing and Validation
 
 - Business logic requires unit tests.
+- GitHub Actions workflow configuration does not require unit tests. Do not
+  create unit tests solely for GitHub Actions changes, and remove existing
+  GitHub-Actions-specific unit tests when they no longer serve another
+  non-workflow behavior.
 - Build and tests must pass before completion.
 
 ## Documentation
@@ -69,4 +73,5 @@
 - `SPEC-006 - Fan State Persistence` (`specs/SPEC-006-fan-state-persistence.md`, status: Approved, date: 2026-06-05)
 - `SPEC-007 - Fan Reset Action` (`specs/SPEC-007-fan-reset-action.md`, status: Approved, date: 2026-06-24)
 - Historical approved spec retained without rewrite: `SPEC-008 - GitHub Actions CI And Private ARM64 And ARMv6 Image Publishing` (`specs/SPEC-008-github-actions-ci-private-arm64-image-publishing.md`, status: Approved, date: 2026-08-16)
+- `SPEC-009 - GitHub Actions Unit-Test Policy` (`specs/SPEC-009-github-actions-unit-test-policy.md`, status: Approved, date: 2026-08-17)
 - `SPEC-010 - Forgejo Visibility-Neutral ARM Publishing` (`specs/SPEC-010-forgejo-visibility-neutral-arm-publishing.md`, status: Approved, date: 2026-08-17)

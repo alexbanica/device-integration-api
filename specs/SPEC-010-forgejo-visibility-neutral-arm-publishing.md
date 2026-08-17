@@ -87,6 +87,9 @@ Out of scope:
    once with `--platform linux/arm64,linux/arm/v6` and `--push`.
 5. Both existing image tags are therefore requested as multi-platform manifest
    indexes independent of Forgejo visibility.
+6. The delivery branch incorporates the freshly fetched `origin/main`, retaining
+   its GitHub Actions unit-test policy and SPEC-009 index entry alongside the
+   historical SPEC-008 and active SPEC-010 entries.
 
 ## Assumptions
 
@@ -118,6 +121,10 @@ Out of scope:
   and no Forgejo organization/visibility/private-read step in the workflow.
 - Docker Hub tag metadata confirmed ARM64 and ARMv6 variants for both pinned base
   tags on 2026-08-17.
+- `git merge-tree` identified `AGENTS.md` as the only merge conflict against the
+  freshly fetched `origin/main` commit `6b2b5b8b4eb7d6a106803a1482812e0fbc0161f0`.
+- Conflict-marker inspection and `git diff --check` confirmed the resolved
+  documentation contains no unresolved merge markers or whitespace errors.
 
 ## Validation Skipped
 
@@ -130,5 +137,6 @@ Out of scope:
 
 - README now documents `write:package` access without an organization-read or
   privacy prerequisite and explains visibility-neutral publication.
-- AGENTS lists this approved correction and retains SPEC-008 as historical
-  context.
+- AGENTS lists this approved correction, retains SPEC-008 as historical context,
+  and incorporates the GitHub Actions testing policy and SPEC-009 entry from
+  `origin/main`.
