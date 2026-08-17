@@ -1,4 +1,5 @@
-name: Publish ARM Images
+name: Publish Docker images
+run-name: Publish Docker images for ${{ github.ref_name }}
 
 on:
   push:
@@ -9,11 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  publish-arm-images:
-    name: Publish ARM64 and ARMv6 image
+  publish:
+    name: Build and push Docker image (ARM64 and ARMv6)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
@@ -48,13 +49,13 @@ jobs:
           FORGEJO_REGISTRY_USERNAME: ${{ secrets.FORGEJO_REGISTRY_USERNAME }}
           FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
 
-      - name: Setup QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 
-      - name: Setup Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Verify Buildx ARM platform support
+      - name: Verify Docker Buildx platforms
         run: |
           set -euo pipefail
           if ! docker buildx inspect | grep -q 'linux/arm64'; then
@@ -69,7 +70,7 @@ jobs:
 
           echo "Buildx supports linux/arm64 and linux/arm/v6"
 
-      - name: Write GitHub token for build auth
+      - name: Write GitHub token file
         id: github_token_file
         run: |
           set -euo pipefail
@@ -78,7 +79,7 @@ jobs:
           chmod 0600 "$GITHUB_TOKEN_FILE"
           echo "GITHUB_TOKEN_FILE=$GITHUB_TOKEN_FILE" >> "$GITHUB_OUTPUT"
 
-      - name: Login to Forgejo registry
+      - name: Log in to Forgejo container registry
         run: |
           set -euo pipefail
           echo "${FORGEJO_REGISTRY_TOKEN}" | \
@@ -89,7 +90,7 @@ jobs:
           FORGEJO_REGISTRY_USERNAME: ${{ secrets.FORGEJO_REGISTRY_USERNAME }}
           FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
 
-      - name: Build and push image
+      - name: Build and push Docker image
         run: |
           set -euo pipefail
 
@@ -103,6 +104,6 @@ jobs:
             --cache-from "type=gha,scope=device-integration-api-linux-arm64-armv6" \
             --cache-to "type=gha,scope=device-integration-api-linux-arm64-armv6,mode=max"
 
-      - name: Cleanup token file
+      - name: Remove GitHub token file
         if: always()
         run: rm -f "${{ runner.temp }}/github_token"
