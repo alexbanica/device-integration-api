@@ -39,6 +39,10 @@
 
 ## Testing and Validation
 - Business logic requires unit tests.
+- GitHub Actions workflow configuration does not require unit tests. Do not
+  create unit tests solely for GitHub Actions changes, and remove existing
+  GitHub-Actions-specific unit tests when they no longer serve another
+  non-workflow behavior.
 - Build and tests must pass before completion.
 
 ## Documentation
@@ -60,3 +64,4 @@
 - `SPEC-005 - Fan Naming Alignment` (`specs/SPEC-005-fan-naming-alignment.md`, status: Approved, date: 2026-06-05)
 - `SPEC-006 - Fan State Persistence` (`specs/SPEC-006-fan-state-persistence.md`, status: Approved, date: 2026-06-05)
 - `SPEC-007 - Fan Reset Action` (`specs/SPEC-007-fan-reset-action.md`, status: Approved, date: 2026-06-24)
+- `SPEC-009 - GitHub Actions Unit-Test Policy` (`specs/SPEC-009-github-actions-unit-test-policy.md`, status: Approved, date: 2026-08-17)
