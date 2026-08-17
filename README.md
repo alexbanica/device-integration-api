@@ -156,7 +156,7 @@ with one Buildx invocation using:
 
 ## Docker publication and multi-platform policy
 
-- Workflow file: `.github/workflows/publish-arm.yml`
+- Workflow file: `.github/workflows/publish-docker-images.yml`
 - Trigger: `push` on all tags.
 - Secret names required:
   - `FORGEJO_REGISTRY_USERNAME`

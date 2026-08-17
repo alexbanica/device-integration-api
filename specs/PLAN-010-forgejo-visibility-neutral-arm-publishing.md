@@ -25,7 +25,7 @@ Approved
 
 ## Affected Files
 
-- `.github/workflows/publish-arm.yml`
+- `.github/workflows/publish-docker-images.yml`
 - `README.md`
 - `AGENTS.md`
 - `specs/SPEC-010-forgejo-visibility-neutral-arm-publishing.md`
@@ -53,7 +53,7 @@ Approved
 - `bash -n docker/build.sh` passed.
 - `npm run lint` passed.
 - `npm test` passed all 66 tests.
-- `npx prettier --check .github/workflows/publish-arm.yml README.md AGENTS.md`
+- `npx prettier --check .github/workflows/publish-docker-images.yml README.md AGENTS.md`
   passed.
 - `git diff --check` passed.
 - Static workflow inspection confirmed both required target platforms, QEMU and

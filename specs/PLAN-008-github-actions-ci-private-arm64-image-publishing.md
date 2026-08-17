@@ -105,7 +105,7 @@ Approved
   - `package-lock.json`.
 - CI workflows:
   - `.github/workflows/ci.yml` (new);
-  - `.github/workflows/publish-arm.yml` (new).
+  - `.github/workflows/publish-docker-images.yml` (new).
 - Project check entry points and existing lint baseline:
   - `package.json`;
   - `tests/fan/controllers/FanController.test.ts`;
@@ -193,7 +193,7 @@ Approved
   - checks out the event revision without persisted credentials;
   - uses Node 20 with npm cache, then `npm ci`, `npm run lint`, and `npm test`;
   - references no Forgejo secret and performs no Docker publication.
-- `.github/workflows/publish-arm.yml`:
+- `.github/workflows/publish-docker-images.yml`:
   - triggers on every pushed tag with a tag pattern that includes `/`;
   - has `permissions: contents: read` and no GitHub package-write permission;
   - checks out the tag event revision without persisted credentials;
@@ -248,10 +248,10 @@ timed-out unit must not be retried unchanged.
 | D2 | Development | Deterministic Docker inputs only: `docker/Dockerfile`, `docker/.dockerignore` | T2 completed | T2 passes; Docker stages/runtime remain unchanged except approved source/install/context behavior | `developer`, maximum 5 minutes |
 | D3 | Development | Project checks only: `package.json`, `tests/fan/controllers/FanController.test.ts`, `tests/fan/infrastructures/FanTerminalGateway.test.ts` | D0 completed; test-first not applicable | `npm run lint` is non-mutating and green, `npm run lint:fix` exists, `npm test` selects all five current test files and passes, assertion behavior is unchanged | `developer`, maximum 5 minutes |
 | D4 | Development | Default-branch CI only: `.github/workflows/ci.yml` | D0 and D3 completed | Exact `main` PR/push triggers, read-only permissions, pinned checkout/setup-node, lockfile-backed npm cache, install/lint/test sequence, no Forgejo/Docker secrets | `developer`, maximum 5 minutes |
-| D5 | Development | Private ARM multi-platform publication only: `.github/workflows/publish-arm.yml` | D0, D1, and D2 completed | All-tag trigger, exact pins, fail-closed privacy/registry/tag preflight, secure login/temp secret, QEMU/Buildx verification for both targets, one build-script call, exact two-platform/cache/push inputs, and no architecture-specific tags | `developer`, maximum 5 minutes |
+| D5 | Development | Private ARM multi-platform publication only: `.github/workflows/publish-docker-images.yml` | D0, D1, and D2 completed | All-tag trigger, exact pins, fail-closed privacy/registry/tag preflight, secure login/temp secret, QEMU/Buildx verification for both targets, one build-script call, exact two-platform/cache/push inputs, and no architecture-specific tags | `developer`, maximum 5 minutes |
 | D6 | Documentation | `README.md`, `AGENTS.md` | D0, D3, D4, and D5 completed | README documents the committed lockfile plus all SPEC-008 operator/developer contracts, including the exact two-platform manifests and ARMv6 validation boundary; AGENTS adds approved SPEC-008 without changing other active specs | `developer`, maximum 5 minutes |
 | R1 | Review | Dependency/check/tooling review: `.gitignore`, `package-lock.json`, `package.json`, the two lint-cleanup test files, `tests/docker/BuildScript.test.ts`, `docker/build.sh`, `.github/workflows/ci.yml` | D0, D1, D3, and D4 completed | Report only: manifest/lockfile mismatch, unintended direct dependency changes, spec/plan mismatches, test gaps, shell/tag/path/multi-platform/cache regressions, check-trigger or secret exposure issues; no edits | `code-reviewer`, maximum 5 minutes |
-| R2 | Review | Publication/security review: `tests/docker/Dockerfile.test.ts`, `docker/Dockerfile`, `docker/.dockerignore`, `.github/workflows/publish-arm.yml` | D2 and D5 completed | Report only: exact ARM64/ARMv6 manifest targets, privacy/auth/cache/context leaks, action-pin errors, Docker runtime regressions, and missing failure paths; no edits | `code-reviewer`, maximum 5 minutes |
+| R2 | Review | Publication/security review: `tests/docker/Dockerfile.test.ts`, `docker/Dockerfile`, `docker/.dockerignore`, `.github/workflows/publish-docker-images.yml` | D2 and D5 completed | Report only: exact ARM64/ARMv6 manifest targets, privacy/auth/cache/context leaks, action-pin errors, Docker runtime regressions, and missing failure paths; no edits | `code-reviewer`, maximum 5 minutes |
 | R3 | Review | Final artifact/documentation review: `README.md`, `AGENTS.md`, approved SPEC-008, approved PLAN-008, and integrated staged diff | D6, R1, and R2 completed and findings resolved | Report only: final spec/plan/documentation mismatch, unrelated changes, missing tracked paths, or delivery risk; no edits | `code-reviewer`, maximum 5 minutes |
 
 ### Execution Order And Concurrency
@@ -326,8 +326,8 @@ timed-out unit must not be retried unchanged.
   - run the compiled `Dockerfile.test.js` directly through `node --test`.
 - Shell, workflow, and formatting validation:
   - `bash -n docker/build.sh`
-  - `actionlint .github/workflows/ci.yml .github/workflows/publish-arm.yml`
-  - `npx prettier --check package.json README.md AGENTS.md .github/workflows/ci.yml .github/workflows/publish-arm.yml`
+  - `actionlint .github/workflows/ci.yml .github/workflows/publish-docker-images.yml`
+  - `npx prettier --check package.json README.md AGENTS.md .github/workflows/ci.yml .github/workflows/publish-docker-images.yml`
   - verify each `uses:` reference equals an approved full SHA and has its exact
     version comment;
   - verify the PR workflow contains no `FORGEJO_` or Docker login/push reference;

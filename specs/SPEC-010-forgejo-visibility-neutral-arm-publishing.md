@@ -42,7 +42,7 @@ platform value `linux/arm64,linux/arm/v6`.
 
 In scope:
 
-- `.github/workflows/publish-arm.yml` visibility-independent publication.
+- `.github/workflows/publish-docker-images.yml` visibility-independent publication.
 - README publication prerequisites and validation boundaries.
 - Active-spec documentation and completed-work artifacts.
 
@@ -115,7 +115,7 @@ Out of scope:
 - `bash -n docker/build.sh`
 - `npm run lint`
 - `npm test` (66 passing tests)
-- `npx prettier --check .github/workflows/publish-arm.yml README.md AGENTS.md`
+- `npx prettier --check .github/workflows/publish-docker-images.yml README.md AGENTS.md`
 - `git diff --check`
 - Static inspection confirmed one exact `linux/arm64,linux/arm/v6` Buildx input
   and no Forgejo organization/visibility/private-read step in the workflow.
