@@ -48,38 +48,6 @@ jobs:
           FORGEJO_REGISTRY_USERNAME: ${{ secrets.FORGEJO_REGISTRY_USERNAME }}
           FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
 
-      - name: Verify Forgejo ownership and privacy
-        run: |
-          set -euo pipefail
-
-          cleanup() {
-            rm -f "$CURL_CFG_FILE" "$ORG_JSON"
-          }
-
-          ORG_JSON=$(mktemp)
-          CURL_CFG_FILE=$(mktemp)
-          trap 'cleanup' EXIT
-
-          printf 'header = "Authorization: token %s"\n' "$FORGEJO_REGISTRY_TOKEN" > "$CURL_CFG_FILE"
-          chmod 0600 "$CURL_CFG_FILE"
-
-          curl --silent --fail --show-error --location \
-            --config "$CURL_CFG_FILE" \
-            https://forgejo.alexlab.nl/api/v1/orgs/alexlab \
-            > "$ORG_JSON"
-
-          ORG_USERNAME=$(jq -r '.username // empty' "$ORG_JSON")
-          ORG_VISIBILITY=$(jq -r '.visibility // empty' "$ORG_JSON")
-
-          if [ "$ORG_USERNAME" != "alexlab" ] || [ "$ORG_VISIBILITY" != "private" ]; then
-            echo "forgejo.alexlab.nl API visibility check failed for alexlab" >&2
-            exit 1
-          fi
-
-          echo "forgejo.alexlab.nl/orgs/alexlab is private"
-        env:
-          FORGEJO_REGISTRY_TOKEN: ${{ secrets.FORGEJO_REGISTRY_TOKEN }}
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 

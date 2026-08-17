@@ -161,15 +161,15 @@ with one Buildx invocation using:
 - Secret names required:
   - `FORGEJO_REGISTRY_USERNAME`
   - `FORGEJO_REGISTRY_TOKEN`
-- `FORGEJO_REGISTRY_TOKEN` must be a Forgejo token scoped with:
-  - `write:package`
-  - `read:organization`
-    and mapped to user/org ownership for `alexlab`.
+- `FORGEJO_REGISTRY_TOKEN` must be a Forgejo token with `write:package`
+  access for packages owned by `alexlab`.
 - The workflow verifies:
   - exact token secrets are present and non-empty
   - tag-name grammar validity for Docker tag safety
-  - `forgejo.alexlab.nl` API reports `alexlab` with `visibility: private`
-  - runner and HTTPS trust for required endpoints
+- Publication is independent of Forgejo organization/package visibility. It does
+  not query owner metadata or require a private-read check, so changing the
+  owner or package between private and public does not block a correctly
+  authorized publish.
 - Token material for GitHub source download is written to a temporary file with mode `0600` and passed as BuildKit secret; token output is not printed in logs.
 - Buildx and QEMU are validated for both `linux/arm64` and `linux/arm/v6` support before build.
 - Only Forgejo registry pushes are executed; no other destination or matrix-driven alternate image list is used.
@@ -210,7 +210,7 @@ with one Buildx invocation using:
 ## Validation boundaries
 
 - Local/CI behavior covered by scripts and workflow files above is deterministic.
-- Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection, private Forgejo org checks, and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.
+- Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.
 
 ## License
 
