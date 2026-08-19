@@ -120,10 +120,8 @@ Dependency installation for reproducible CI and local Docker builds requires the
 
 Local defaults from `docker/.env` remain:
 
-- `DOCKER_REGISTRY_URI=registry.pi.home:5000`
 - `BASE_IMAGE_VERSION=19.2.0-alpine3.15`
 - `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.15`
-- `GITHUB_REPO=https://api.github.com/repos/alexbanica/device-integration-api`
 - Build options `--debug`, `--platform`, `--push`, `--force`, and `--release` are still supported.
 - Running from repository root still works with:
   ```bash
@@ -135,7 +133,8 @@ Local defaults from `docker/.env` remain:
 - Release: `forgejo.alexlab.nl/alexlab/device-integration-api:<TAG>-node19.2.0-alpine3.15`
 - Rolling: `forgejo.alexlab.nl/alexlab/device-integration-api:latest-node19.2.0-alpine3.15`
 
-`<TAG>` is the Git tag name only; the source revision used for archive download is the immutable tag event SHA.
+`<TAG>` is the Git tag name. The image source is the repository checkout made
+by GitHub Actions for that tag event.
 
 `./docker/build.sh` publishes both tags as one multi-platform manifest index containing exactly:
 
@@ -151,8 +150,8 @@ with one Buildx invocation using:
 
 - Registry output is enforced to `forgejo.alexlab.nl/alexlab`.
 - Publish workflow validates secrets and registry prefix before login/push.
-- The source tarball/revision used for build is `${{ github.sha }}`; image tags remain based on `${{ github.ref_name }}`.
-- The script requires readable secret source and validates release tag, source revision, platform expression, and registry prefix before invoking Docker.
+- The checked-out repository root is the Docker build context; image tags remain based on `${{ github.ref_name }}`.
+- The script validates release tag, platform expression, and registry prefix before invoking Docker.
 
 ## Docker publication and multi-platform policy
 
@@ -170,7 +169,7 @@ with one Buildx invocation using:
   not query owner metadata or require a private-read check, so changing the
   owner or package between private and public does not block a correctly
   authorized publish.
-- Token material for GitHub source download is written to a temporary file with mode `0600` and passed as BuildKit secret; token output is not printed in logs.
+- No GitHub token or source-archive download is needed after checkout.
 - Buildx and QEMU are validated for both `linux/arm64` and `linux/arm/v6` support before build.
 - Only Forgejo registry pushes are executed; no other destination or matrix-driven alternate image list is used.
 - Manifest-level output means tag digests move with each pushed tag/publish event while maintaining local `latest` roll behavior.
