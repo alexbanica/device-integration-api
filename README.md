@@ -120,7 +120,6 @@ Dependency installation for reproducible CI and local Docker builds requires the
 
 Local defaults from `docker/.env` remain:
 
-- `DOCKER_REGISTRY_URI=registry.pi.home:5000`
 - `BASE_IMAGE_VERSION=19.2.0-alpine3.15`
 - `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.15`
 - Build options `--debug`, `--platform`, `--push`, `--force`, and `--release` are still supported.
