@@ -124,9 +124,9 @@ public Forgejo PyPI index alongside `pigpio`. Fan commands can therefore invoke
 or using its repository `run.sh`. Pulse JSON files remain deployment
 configuration and must be mounted separately.
 
-The emitter install uses `--no-deps` because the image explicitly supplies the
-runtime dependency (`pigpio`) and must not resolve build-host-selected board GPIO
-packages inside the Alpine container.
+The emitter install uses Forgejo as its primary package index and public PyPI as
+an additional index. This keeps the emitter distribution sourced from Forgejo
+while allowing pip to resolve its declared third-party dependencies.
 
 Local defaults from `docker/.env` remain:
 

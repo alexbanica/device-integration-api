@@ -16,20 +16,23 @@ Spec: `specs/SPEC-011-packaged-ir-emitter-runtime.md`
 
 1. Verified the existing image contains Python and pigpio but not the emitter
    distribution.
-2. Added a pinned, public-index, dependency-suppressed emitter install.
-3. Documented direct module execution and pulse-data separation.
+2. Added a pinned emitter install with Forgejo as the primary index and public
+   PyPI as the additional dependency index.
+3. Kept dependency resolution enabled and documented direct module execution
+   and pulse-data separation.
 4. Added and indexed completed-work artifacts.
 5. Ran short static validation and reconciled the staged change set.
 
 ## Validation Run
 
 - `git diff --check`
-- Dockerfile structural inspection for the pinned index and package version.
+- Dockerfile structural inspection for the pinned version, exact Forgejo and
+  PyPI indexes, and absence of `--no-deps`.
 
 ## Validation Skipped
 
 - Docker build and image smoke testing.
-- Forgejo package download and multi-platform publication.
+- Forgejo/PyPI package download and multi-platform publication.
 - Automated tests because Docker behavior is outside the allowed domain-test
   boundary.
 
@@ -49,5 +52,6 @@ Spec: `specs/SPEC-011-packaged-ir-emitter-runtime.md`
 
 ## Residual Risk
 
-- Delivery remains DRAFT until a new image is built for both target platforms,
-  published, pulled, and smoke-tested with pigpio on pi11.
+- Delivery remains DRAFT until a new image is built with dependency resolution
+  for both target platforms, published, pulled, and smoke-tested with pigpio on
+  pi11.
