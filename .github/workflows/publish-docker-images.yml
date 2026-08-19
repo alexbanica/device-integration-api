@@ -58,12 +58,14 @@ jobs:
       - name: Verify Docker Buildx platforms
         run: |
           set -euo pipefail
-          if ! docker buildx inspect | grep -q 'linux/arm64'; then
+          buildx_inspect="$(docker buildx inspect)"
+
+          if ! grep -Fq 'linux/arm64' <<<"$buildx_inspect"; then
             echo "Buildx platform linux/arm64 not available" >&2
             exit 1
           fi
 
-          if ! docker buildx inspect | grep -q 'linux/arm/v6'; then
+          if ! grep -Fq 'linux/arm/v6' <<<"$buildx_inspect"; then
             echo "Buildx platform linux/arm/v6 not available" >&2
             exit 1
           fi
