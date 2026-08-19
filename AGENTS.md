@@ -93,3 +93,4 @@
 - Historical approved spec retained without rewrite: `SPEC-008 - GitHub Actions CI And Private ARM64 And ARMv6 Image Publishing` (`specs/SPEC-008-github-actions-ci-private-arm64-image-publishing.md`, status: Approved, date: 2026-08-16)
 - `SPEC-009 - GitHub Actions Unit-Test Policy` (`specs/SPEC-009-github-actions-unit-test-policy.md`, status: Approved, date: 2026-08-17)
 - `SPEC-010 - Forgejo Visibility-Neutral ARM Publishing` (`specs/SPEC-010-forgejo-visibility-neutral-arm-publishing.md`, status: Approved, date: 2026-08-17)
+- `SPEC-011 - Packaged IR Emitter Runtime` (`specs/SPEC-011-packaged-ir-emitter-runtime.md`, status: Approved, date: 2026-08-19)

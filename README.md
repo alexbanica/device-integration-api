@@ -118,6 +118,16 @@ Dependency installation for reproducible CI and local Docker builds requires the
 
 ## Docker builds
 
+The runtime image installs the pinned `rpi-groove-ir-emitter` package from the
+public Forgejo PyPI index alongside `pigpio`. Fan commands can therefore invoke
+`python3 -m ir_emitter <pulse-file>` without mounting an emitter source checkout
+or using its repository `run.sh`. Pulse JSON files remain deployment
+configuration and must be mounted separately.
+
+The emitter install uses `--no-deps` because the image explicitly supplies the
+runtime dependency (`pigpio`) and must not resolve build-host-selected board GPIO
+packages inside the Alpine container.
+
 Local defaults from `docker/.env` remain:
 
 - `BASE_IMAGE_VERSION=19.2.0-alpine3.15`

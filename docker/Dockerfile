@@ -8,6 +8,8 @@ RUN npm run build
 
 FROM node:BASE_IMAGE_VERSION AS runtime
 
+ARG IR_EMITTER_VERSION=1.0.1
+
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
@@ -15,7 +17,11 @@ COPY --from=builder /app/package*.json ./
 COPY docker/docker-entrypoint.sh /usr/local/bin/
 
 RUN apk add --no-cache python3 py3-pip su-exec && \
-    pip3 install pigpio
+    pip3 install pigpio && \
+    pip3 install \
+      --no-deps \
+      --index-url https://forgejo.alexlab.nl/api/packages/public/pypi/simple \
+      "rpi-groove-ir-emitter==${IR_EMITTER_VERSION}"
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     mkdir -p /app/state && \
     chown -R node:node /app/state
