@@ -61,7 +61,10 @@
 
 ## Testing and Validation
 
-- Business logic requires unit tests.
+- Deterministic domain business logic requires unit tests. The domain-only
+  policy above prohibits creating or maintaining automated tests for other
+  layers, even where legacy controller, infrastructure, or configuration tests
+  remain in the tree.
 - GitHub Actions workflow configuration does not require unit tests. Do not
   create unit tests solely for GitHub Actions changes, and remove existing
   GitHub-Actions-specific unit tests when they no longer serve another
@@ -81,17 +84,14 @@
 - Each spec is implemented in its own branch.
 - Do not implement specs in `main`/`master`.
 
-## Current Active Specs
+## Durable Documentation Authority
 
-- Historical approved spec retained without rewrite: `SPEC-001 - Ventilator Module Alignment` (`specs/SPEC-001-ventilator-module-alignment.md`, status: Approved, date: 2026-02-26)
-- `SPEC-002 - Docker Pigpiod Cleanup` (`specs/SPEC-002-docker-pigpiod-cleanup.md`, status: Approved, date: 2026-02-26)
-- Historical approved spec retained without rewrite: `SPEC-003 - Ventilator Standby Wakeup` (`specs/SPEC-003-ventilator-standby-wakeup.md`, status: Approved, date: 2026-03-01)
-- Historical approved spec retained without rewrite: `SPEC-004 - Ventilator Standby Wakeup State Gate` (`specs/SPEC-004-ventilator-standby-wakeup-state-gate.md`, status: Approved, date: 2026-06-05)
-- `SPEC-005 - Fan Naming Alignment` (`specs/SPEC-005-fan-naming-alignment.md`, status: Approved, date: 2026-06-05)
-- `SPEC-006 - Fan State Persistence` (`specs/SPEC-006-fan-state-persistence.md`, status: Approved, date: 2026-06-05)
-- `SPEC-007 - Fan Reset Action` (`specs/SPEC-007-fan-reset-action.md`, status: Approved, date: 2026-06-24)
-- Historical approved spec retained without rewrite: `SPEC-008 - GitHub Actions CI And Private ARM64 And ARMv6 Image Publishing` (`specs/SPEC-008-github-actions-ci-private-arm64-image-publishing.md`, status: Approved, date: 2026-08-16)
-- `SPEC-009 - GitHub Actions Unit-Test Policy` (`specs/SPEC-009-github-actions-unit-test-policy.md`, status: Approved, date: 2026-08-17)
-- `SPEC-010 - Forgejo Visibility-Neutral ARM Publishing` (`specs/SPEC-010-forgejo-visibility-neutral-arm-publishing.md`, status: Approved, date: 2026-08-17)
-- `SPEC-011 - Packaged IR Emitter Runtime` (`specs/SPEC-011-packaged-ir-emitter-runtime.md`, status: Approved, date: 2026-08-19)
-- `SPEC-012 - Buildx Platform Verification Reliability` (`specs/SPEC-012-buildx-platform-verification-reliability.md`, status: Approved, date: 2026-08-19)
+- Current source and configuration define implementation behavior;
+  `openapi/device-integration-api.openapi.yaml` defines the public HTTP contract,
+  `http/` contains executable examples, and `README.md` owns user/operator,
+  Docker, CI, and release guidance. Removed completed specifications remain in
+  Git history.
+- Never infer hosted or hardware success from local source checks. Docker image
+  builds, Forgejo pushes and manifests, ARM64/ARMv6 pulls and smoke tests,
+  pigpiod connectivity, packaged IR emission, physical fan behavior, and
+  persistent-volume operation require live validation.

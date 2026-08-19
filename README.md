@@ -32,9 +32,34 @@ Device Integration API is a Node.js server project written in TypeScript that pr
 
 - Source modules are separated under `src` by package (`common`, `fan`, and future device packages).
 - All implementation changes are spec-driven and must be approved before coding.
-- Specs are stored under `specs/`.
+- Active change specifications are stored under `specs/` while work is in
+  progress. Completed artifacts may be removed after their durable behavior is
+  reconciled into current code, OpenAPI, examples, README, and contributor
+  guidance; history remains available in Git.
 - Agent and architecture conventions are tracked in `AGENTS.md`.
 - API routes are versioned under `/api/v1`.
+
+### Current API and fan behavior
+
+- `GET /api/v1/health` reports application health. The fan API exposes state,
+  start, stop, reset, rotation, and speed `0...3`; the exact wire contract is
+  `openapi/device-integration-api.openapi.yaml`, with executable examples under
+  `http/`.
+- Fan state is exactly `{ isOn, speed, isRotating }`. It is loaded from
+  `FAN_STATE_FILE_PATH`; a missing file is initialized to the default off state,
+  while invalid JSON or an invalid state prevents startup. Saves use a sibling
+  temporary file followed by rename.
+- Start is idempotent and establishes on/speed-1/not-rotating. Stop is
+  idempotent and establishes the default off state. Speed `0` delegates to
+  stop; positive speeds start an off fan and advance the configured speed
+  command cyclically through speeds 1 to 3. Rotation becomes active only while
+  the fan is on.
+- Reset is a persistence/state repair operation: it stores the default off
+  state without issuing a hardware shell command.
+- After a successful command has been idle for at least
+  `FAN_STANDBY_TIMEOUT_MS`, eligible stop/rotate/speed operations first issue
+  the configured start command as a wake-up pulse. The first command after
+  process startup has no prior timestamp and does not synthesize a wake-up.
 
 ## Prerequisites
 
@@ -220,6 +245,11 @@ with one Buildx invocation using:
 
 - Local/CI behavior covered by scripts and workflow files above is deterministic.
 - Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.
+- Repository configuration does not prove hosted Actions runner availability,
+  QEMU/Buildx behavior, Forgejo authentication or publication, emitter package
+  availability, pigpiod connectivity, IR transmission, fan hardware state, or
+  persistence-volume behavior. Treat those outcomes as operationally
+  unverified until exercised in the target environment.
 
 ## License
 
