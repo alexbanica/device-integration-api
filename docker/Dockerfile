@@ -17,6 +17,7 @@ COPY --from=builder /app/package*.json ./
 COPY docker/docker-entrypoint.sh /usr/local/bin/
 
 RUN apk add --no-cache python3 py3-pip su-exec && \
+    python3 -m pip install --upgrade "pip==26.0.1" && \
     pip3 install pigpio && \
     pip3 install \
       --index-url https://forgejo.alexlab.nl/api/packages/public/pypi/simple \
