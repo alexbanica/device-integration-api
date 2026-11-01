@@ -74,8 +74,74 @@ paths:
           description: Invalid speed parameter
         '500':
           description: Command failed
+  /api/v1/shades/backyard/up:
+    post:
+      summary: Send backyard shade up command (close)
+      description: Available only when SHADE_ENABLED is true. No payload is used. Acknowledges transmitter execution, without position or physical movement confirmation. Failed commands may already have emitted RF and are never retried automatically.
+      responses:
+        '202':
+          description: Transmitter command completed; empty response
+        '409':
+          description: Another shade command is running or cleanup is uncertain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Command failed, timed out, or could not be safely cleaned up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/shades/backyard/down:
+    post:
+      summary: Send backyard shade down command (open)
+      description: Available only when SHADE_ENABLED is true. No payload is used. Acknowledges transmitter execution, without position or physical movement confirmation. Failed commands may already have emitted RF and are never retried automatically.
+      responses:
+        '202':
+          description: Transmitter command completed; empty response
+        '409':
+          description: Another shade command is running or cleanup is uncertain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Command failed, timed out, or could not be safely cleaned up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/shades/backyard/my:
+    post:
+      summary: Send backyard shade my command (stop)
+      description: Available only when SHADE_ENABLED is true. No payload is used. Acknowledges transmitter execution, without position or physical movement confirmation. Failed commands may already have emitted RF and are never retried automatically.
+      responses:
+        '202':
+          description: Transmitter command completed; empty response
+        '409':
+          description: Another shade command is running or cleanup is uncertain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Command failed, timed out, or could not be safely cleaned up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      required: [message, timestamp]
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
     FanState:
       type: object
       required:

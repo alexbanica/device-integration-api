@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import { register_fan_module } from './fan/fan';
 import { register_common_module } from './common/common';
+import { register_shades_module } from './shades/shades';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const app = express();
 async function register_modules(app: Express): Promise<void> {
   register_common_module(app);
   await register_fan_module(app, process.env);
+  register_shades_module(app, process.env);
 }
 
 register_modules(app)
