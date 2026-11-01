@@ -49,6 +49,11 @@
 - `src/fan/dtos`: service-level fan state objects.
 - `src/fan/services`: fan use-case orchestration behind `FanServiceInterface`.
 - `src/fan/infrastructures`: terminal/gateway adapters behind `FanTerminalGatewayInterface`.
+- `src/shades/configurations`: backyard-shade environment configuration and validation.
+- `src/shades/controllers`: optional, versioned shade command routes.
+- `src/shades/services`: serialized per-process shade command orchestration.
+- `src/shades/infrastructures`: shade-specific process and terminal adapters.
+- `src/shades/dtos`: shade command execution and cleanup-confidence state.
 - Root `http/` files document and exercise controller contracts.
 
 ## Coding Rules
@@ -91,7 +96,32 @@
   `http/` contains executable examples, and `README.md` owns user/operator,
   Docker, CI, and release guidance. Removed completed specifications remain in
   Git history.
+- Backyard shade routes are optional: absent/false `SHADE_ENABLED` disables
+  them, true enables them and requires `SHADE_SCRIPT_DIR`, `SHADE_BASH_UP`,
+  `SHADE_BASH_DOWN`, and `SHADE_BASH_MY`. The three POST commands map `up` to
+  close, `down` to open, and `my` to stop. Empty 202 acknowledges transmitter
+  process completion only; sanitized 500 failure can follow RF emission and
+  rolling-code advancement. Concurrent or cleanup-quarantined sends return 409;
+  uncertain cleanup remains quarantined until process restart. Never retry
+  automatically or restore rolling-code state.
+- Shade shell commands are trusted full operator configuration, executed via
+  `/bin/sh`; never interpolate HTTP input. Keep the one-process, one-profile,
+  one-transmitter ownership boundary, with no replicas, external CLI sender, or
+  concurrent receiver capture. The paired profile is operator-provisioned; its
+  persistently mounted parent directory must be writable for sibling temporary
+  file creation and rename. Do not automatically initialize, repair, or chown
+  the profile. Provision only the SPI/GPIO mappings and supplemental groups
+  required by the host, without blanket privileged access.
+- Runtime packaging pins the reviewed `rpi-cc1101-transciever==1.0.0b2` wheel by
+  checksum and installs dependencies from a separate public PyPI index. It uses
+  isolated, checksum-verified CPython 3.11.18 under `/opt/python`; preserve the
+  IR emitter, base image and supported platforms. Any package/version override
+  requires release metadata, CLI contract and hash review.
 - Never infer hosted or hardware success from local source checks. Docker image
   builds, Forgejo pushes and manifests, ARM64/ARMv6 pulls and smoke tests,
   pigpiod connectivity, packaged IR emission, physical fan behavior, and
   persistent-volume operation require live validation.
+- Shade ARM64/ARMv6 final-image/package validation and live Pi/device/profile,
+  persistence, bounded CLI duration and physical command behavior remain
+  separate evidence requirements. Local checks do not prove them; publication,
+  deployment and RF actuation need explicit authority.
