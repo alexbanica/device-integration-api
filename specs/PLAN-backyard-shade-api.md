@@ -353,3 +353,412 @@ approval covers the complete plan with those package-detail updates. All other
 plan decisions and the approved effective SPEC remain unchanged. Implementation
 still requires explicit implement entry in a new session, cleared context, or
 explicit same-context consent; this approval is not implementation execution.
+
+## Amendment 1 — 2026-11-13 — ARMv6-compatible Alpine Python
+
+- Amendment ID: PLAN-backyard-shade-api-A1
+- Previous version: Approved original body, including published-package updates.
+- Approval: Automatically approved on 2026-11-13 after independent readiness assurance; original document status is preserved.
+- Request and purpose: The user states that Alpine 3.15 was selected for ARMv6,
+  and instructs: “if a different alpine can run on armv6 then use that instead”.
+  Resume the originating implement request on the existing PR to simplify Python
+  packaging while retaining ARMv6 and ARM64. The effective SPEC (original plus
+  SPEC-backyard-shade-api-A1) is unaffected: it requires Python >=3.10 and both
+  platforms, and does not fix an Alpine version.
+
+### Changes against the previous version
+
+| Section / requirement | Before | After | Reason |
+| --- | --- | --- | --- |
+| §4 base and Python | Node 19.2.0 / Alpine 3.15; source-build CPython 3.11.18 under /opt/python. | Both bases become node:19.2.0-alpine3.16; install Alpine python3 and py3-pip, assert Python >=3.10, create /opt/venv with python3 -m venv and put /opt/venv/bin first on PATH. Keep Node unchanged. | Registry manifests include both required architectures; Alpine supplies compatible Python. |
+| §4 compilation and libraries | Build CPython with extensive headers, download/checksum source, create interpreter links, set LD_LIBRARY_PATH, scan ELF dependencies. | Remove CPython-specific build/download/checksum/linker/scanner machinery. Use temporary build-base, linux-headers, python3-dev and swig only for native Python dependencies. Remove this virtual group after pip installation, then verify imports/help using the final interpreter and runtime user. Retain explicit runtime libraries only if an actual dependency check requires them. | Packaged Python owns its runtime libraries; native extensions still need compiler tools. |
+| §4 package installation | pip 26.0.1, public dependencies, hash-verified Forgejo shade wheel, existing IR emitter and import/help checks on custom Python. | Preserve exact pip version, shade name/version/wheel hash/metadata/guard, separate dependency indexes, emitter version and install behavior, pip check and post-removal import/help checks in the venv. Remove downloaded wheel and pip cache. | Simplify interpreter installation without weakening package provenance or dependency checks. |
+| §1 location and delivery | Initial detached new branch and PR creation; later DRAFT recovery. | Continue existing PR #11 on origin/feature/backyard-shade-api from refreshed 80c8eccde4064c33e6223f59be1b88b76d619737 in /tmp/agent-worktrees/device-integration-api/backyard-shade-api. Existing-PR mode uses the verified attached branch. A missing registration at this exact path was removed non-forcibly and recreated. Commit and push non-forcibly to the same branch; update the same PR, never main. Retain the clean worktree detached at a blocked DRAFT checkpoint; remove only after the complete Definition of Done. No invoking artifacts need transfer or cleanup. | PR #10 was accidentally squash-merged, main was restored at the user's request, and #11 now contains the unchanged implementation. |
+| §§3, 6 assurance | Initial full reviews included code, contract and security. | Full profile for packaging. Independent code review and final QA cover this complete amendment and its direct dependencies. No API/event changes: contract-review trigger absent. No explicit security-review request: security specialist not selected under current user instructions. Preserve all earlier source coverage and inspect credible fan/shade/runtime regressions. Required documentation writer runs once after final QA. | Current user routing rules and the actual packaging-only scope. |
+
+### Evidence and resolved choices
+
+Explorer alpine-manifests retrieved the actual Docker Hub manifest for
+node:19.2.0-alpine3.16, index digest
+sha256:80844b6643f239c87fceae51e6540eeb054fc7114d979703770ec75250dcd03b.
+It contains linux/arm/v6 child
+sha256:33241925195fbe69a9b042cfbc5b1e5b0a0cb95d5f85019dc3f767296eb52957
+and linux/arm64/v8 child
+sha256:c97c33d5256044b55bbb7af9838a4c212b9044b2675bf3c8c7899d893803499c.
+The official v3.16/main/armhf APKINDEX records python3 3.10.14-r1. A temporary
+unprivileged AMD64 container from that exact tag successfully installed python3
+and py3-pip and created a venv; both interpreters reported 3.10.14. No ARM
+execution, shade dependency installation or hardware operation was proved by
+that check. Sources: Docker Hub registry via buildx imagetools inspect --raw;
+https://dl-cdn.alpinelinux.org/alpine/v3.16/main/armhf/APKINDEX.tar.gz.
+Node 22 / Alpine 3.24 was also found to support both targets, but changes the
+Node major and Python minor. The same-Node 3.16 tag is the narrower choice for
+this request; it is not a claim of current upstream lifecycle support.
+
+### Units, ownership, validation and delivery
+
+- P1: Developer owns docker/Dockerfile and tracked docker/.env only. Replace
+  interpreter installation and base defaults as above. Preserve build-argument
+  forwarding, entrypoint, user, volumes, fan/shade sources and HTTP contracts.
+  No automated tests for these non-domain paths. Shell parsing and build checks
+  are permitted; no children commit, push, publish, configure hosts or actuate.
+- P2: Parent serially runs build/lint/existing tests, shell syntax, diff checks,
+  a non-publishing local AMD64 full image build and final-user import/version,
+  dependency consistency and CLI help checks. Verify the source wheel hash and
+  declared requirements through the preserved Docker assertions. Verify exact
+  base manifest platforms. ARM64/ARMv6 final-image build/run evidence remains
+  required; the current local builder supports AMD64/386 only and cannot export
+  OCI. Do not install privileged emulation or change hosts to obtain evidence.
+- P3: Independent code-reviewer covers the entire packaging delta, effective
+  artifacts, existing emitter/shade consumers, dependency cleanup and checks;
+  collect findings and apply one consolidated bounded correction batch through
+  the developer, then run affected checks. Independent qa-agent validates final
+  permitted checks and missing evidence. Repeat only for qualifying failures.
+- P4: After QA, documentation-writer owns README.md and project-specific AGENTS.md
+  packaging guidance only: new base/default image tags, system Python/venv,
+  removal of CPython build machinery, actual validation outcomes and remaining
+  ARM/live gaps. Preserve global workflow guidance and all HTTP examples.
+- Parent alone owns this PLAN amendment, reconciliation, staged diff, commit,
+  non-force push, remote/upstream and PR head verification, exact-head CI and
+  guarded clean-worktree disposition. Keep main unchanged. No image push, release
+  tag, deployment, live device access, profile mutation or RF actuation.
+
+Planning assurance: one packaging concern serving independent fan and shade
+modules; no interaction of business-domain rules changes. Architect trigger is
+absent. Independent readiness review of this complete effective PLAN is required
+before amendment approval and developer dispatch. Aim three minutes per bounded
+specialist assignment; interrupt at five minutes and retain partial evidence.
+
+### Requirement-to-delivery trace
+
+| Effective SPEC / PLAN criterion | Unit / paths | Evidence |
+| --- | --- | --- |
+| SPEC §6 Python >=3.10 and both ARM targets | P1 Dockerfile/.env, P2 | Actual base manifest and armhf APK metadata; packaged Python/venv version; target builds/runtime remain required. |
+| SPEC §6 pinned dependencies, CLI, emitter and user | P1, P2, P3 | Preserved wheel hash/metadata, separate indexes, pip check, imports and help after tools removed and as node. |
+| SPEC §§2, 4, 5 preserved HTTP, fan, timing and ownership | No source change; P2/P3 | Build/lint/existing tests, path diff and packaging consumer review; earlier process evidence does not establish new image runtime. |
+| SPEC §§7, 8 evidence and docs | P2/P4 README/AGENTS | Actual non-publishing checks, honest architecture/live gaps, updated packaging guidance. |
+| PLAN §1 delivery and §6 Definition of Done | Parent | Verified same-branch push/PR/CI; remain blocked DRAFT while required ARM/Pi qualification is unavailable. |
+
+### Preserved behavior and impact
+
+Preserve the complete effective SPEC, shade API/configuration/process-group
+semantics, single-owner profile constraints, package and IR-emitter pins,
+platforms, runtime user, entrypoint, publication workflow, persistence and
+live-effect boundaries. No new domain logic or tests. Original artifacts and
+approval records remain unchanged above this amendment. Existing hardware and
+ARM qualification criteria are not skipped or weakened.
+
+### Approval record
+
+Independent readiness reviewer alpine-ready reviewed the complete effective pair
+and packaging paths at PLAN SHA-256 e07192af3e8b58978b14a3e216edc5e22a093bc2ddb038c429fd5b6a31d6b5b3
+and reported no findings. Parent verified identity, coverage and artifact hashes.
+On 2026-11-13 the parent automatically approves PLAN-backyard-shade-api-A1 and
+the complete effective PLAN (original plus this amendment) under the originating
+$implement request and the user's conditional Alpine replacement instruction.
+Approval is bounded to the recorded packaging, validation, documentation and
+same-PR delivery delta; it is not manual user review of this generated amendment.
+SPEC is unaffected and retains its complete existing approval. Required code
+review, QA and actual delivery evidence follow during implementation.
+
+## Amendment 2 — 2026-11-13 — Native lgpio prerequisite
+
+- Amendment ID: PLAN-backyard-shade-api-A2
+- Previous version: Approved original plus PLAN-backyard-shade-api-A1.
+- Approval: Automatically approved on 2026-11-13 after independent readiness assurance; original status and A1 are preserved.
+- Request and purpose: Complete the originating implement request and the user's
+  Alpine replacement instruction after the actual A1 image build exposed a
+  required native dependency. SPEC remains unchanged.
+
+### Changes against the previous version
+
+| Section / requirement | Before | After | Reason |
+| --- | --- | --- | --- |
+| A1 native dependencies / P1 | Compiler, Python headers and SWIG; lgpio resolved transitively through rpi-lgpio. | Add checksum-verified upstream native liblgpio v0.2.2, built with the existing temporary tools. Install only liblgpio.so.1 and its liblgpio.so linker symlink into /usr/lib, retained in the final image. Pin the matching Python lgpio==0.2.2.0 in the public dependency install. | Actual AMD64 build and independent alpine-code-1 review prove the Python extension links -llgpio and fails without the native library. |
+| A1 temporary tools and cleanup | build-base, linux-headers, python3-dev, swig. | Also include temporary curl for HTTPS source retrieval. Verify archive hash before extraction, run make -j2 lib, copy only the required lgpio shared library and linker symlink, then remove native source/archive with tools/cache/wheel cleanup. Never install upstream daemons, scripts, devices, permissions or services. | Native library is not packaged in checked Alpine indexes; install its runtime artifact without unrelated upstream operations. |
+
+### Evidence and implementation mechanics
+
+Explorer alpine-lgpio inspected official main/community APKINDEX files for
+Alpine v3.16 armhf/x86_64 and v3.24 armhf/x86_64/aarch64: none contains lgpio,
+liblgpio or lgpio-dev. The exact Python extension lgpio 0.2.2.0 from PyPI linked
+with -llgpio and failed in the A1 full image build. Independent alpine-code
+review confirmed the failure in /tmp/shade-alpine316-build.log and supplied one
+high finding, alpine-code-1; this amendment is its accepted correction scope.
+
+Upstream tag v0.2.2 resolves to commit
+b959a17d723360e85648316757b02dbea9902feb. Use
+https://github.com/joan2937/lg/archive/refs/tags/v0.2.2.tar.gz
+with SHA-256 b08d8569d6dc8fa91a42ba1e37f620fdcb19d6bf2330e4b7d7301431ddbe124c.
+Its PY_LGPIO/setup.py version is 0.2.2.0. The Makefile lib target produces
+liblgpio.so.1; install that file with mode 0755 in /usr/lib and create the
+relative linker symlink liblgpio.so -> liblgpio.so.1. Use the target compiler
+without CPU-specific flags or cross-architecture binary copies. Do not run the
+upstream broad install target. Source/header files and unused build outputs
+remain temporary. The explorer successfully built the library, installed exact
+Python lgpio 0.2.2.0 and imported it in an unprivileged AMD64 container from the
+selected base. This is not ARM runtime evidence.
+
+### Ownership, trace and assurance
+
+P1 developer retains Dockerfile-only correction ownership; docker/.env stays
+at the A1 version. Parent retains PLAN and delivery. No other application,
+workflow, API/event, profile or hardware paths change. The native library is a
+direct dependency of SPEC §6 package installation; P2 rebuilds the full AMD64
+image and exercises the unchanged post-cleanup checks as node. Verify loaded
+lgpio works after temporary tools are removed and that source/archive are absent.
+Both ARM target builds/runtime and authorized Pi criteria remain mandatory and
+pending. No new automated tests for non-domain logic.
+
+Independent readiness reviews this complete effective PLAN before automatic
+approval and correction dispatch. One packaging dependency, no interacting
+business-domain rules: architect trigger absent. Complete the consolidated
+accepted correction batch and affected build checks, then independent focused
+code review for the changed dependency/provenance/runtime boundary and final QA.
+A further cycle is justified by this confirmed required-build failure. The
+benefit is restoring an otherwise unbuildable image; impact is one small pinned
+native library and matching Python dependency. P4 documentation-writer still runs
+once, after final QA. Current contract/security triggers remain absent as in A1.
+All A1 branch/PR delivery, deadlines, platform and no-live-effect rules remain.
+
+### Preserved behavior and impact
+
+A1's Alpine 3.16 bases, Node version, packaged Python/venv, exact shade/emitter
+pins, package provenance, runtime-user checks, and the entire effective SPEC are
+unchanged. CPython source-build machinery stays removed. Only the demonstrated
+native prerequisite is added; no devices, daemons, deployment or actuation.
+
+### Approval record
+
+Independent alpine-ready-A2 reviewed the complete effective pair at PLAN SHA-256
+aa22d7a2fc8726ac54b43612749a52d8c2a18afcd4caab74ac6a938718ff4779
+and found no readiness issues. Parent verified the handoff and automatically
+approves PLAN-backyard-shade-api-A2 and the complete effective PLAN through A2
+on 2026-11-13 under the originating implement request and active A1 correction
+obligation. The native prerequisite, matching Python pin and constrained build
+are the approved delta; no manual user review is asserted. SPEC is unaffected.
+Actual code review, image checks and final QA remain implementation obligations.
+
+## Amendment 3 — 2026-11-13 — Isolate fan and shade Python dependencies
+
+- Amendment ID: PLAN-backyard-shade-api-A3
+- Previous version: Approved original plus A1 and A2.
+- Approval: Automatically approved on 2026-11-13 after independent readiness assurance; preceding content/status are preserved.
+- Request and purpose: Complete the same implementation and Alpine replacement
+  after actual image checks and independent review demonstrated a conflicting
+  Python GPIO namespace. SPEC remains unchanged.
+
+### Changes against the previous version
+
+| Section / requirement | Before | After | Reason |
+| --- | --- | --- | --- |
+| A1 interpreter environments | One /opt/venv for shade and IR emitter. | Two default-isolated venvs created with Alpine Python: /opt/ir-venv for pigpio and the unchanged emitter installation; /opt/shade-venv for cc1101, rpi-lgpio, pinned lgpio, spidev and the hash-verified shade wheel. Install pinned pip 26.0.1 in each. No system-site-packages sharing. | The emitter dependency Jetson.GPIO overwrites RPi/GPIO files in a shared environment, breaking the shade's rpi-lgpio import. |
+| A1 executable discovery | /opt/venv/bin first on PATH. | PATH=/opt/ir-venv/bin:/opt/shade-venv/bin followed by the base PATH. Default python3 -m ir_emitter therefore keeps the fan contract; cc1101-transceiver resolves from the shade venv and its generated shebang selects that environment. Use explicit interpreter paths for installation and verification. No shell dispatch wrappers or application changes. | Preserve both existing command forms while separating conflicting dependency namespaces. |
+| A1/A2 post-cleanup checks | Combined Python import and pip check. | As node, check the shade version/floor/metadata and all shade/native/stdlib imports using /opt/shade-venv/bin/python3; assert Jetson is absent from the shade environment. Check the IR version and ir_emitter/pigpio imports using the default IR interpreter. Run pip check in both environments and all three existing CLI help forms through final PATH. Confirm the namespace ownership and executable paths in the final image. | Preserve hardware-free runtime qualification for both consumers; never suppress the failing shade import or add devices to the build. |
+
+### Evidence, disposition and validation
+
+The A2 full AMD64 build at /tmp/shade-alpine316-build-fixed.log proves checksum
+verification, native compilation, Python lgpio 0.2.2.0 installation and pinned
+shade wheel installation succeeded. The emitter then installs Jetson.GPIO
+2.1.13, and RPi/GPIO/__init__.py imports Jetson.GPIO, raising an error for absent
+/dev/gpiochip0 during the required node-user shade import. Independent
+alpine-code-A2 confirmed high finding alpine-code-A2-1 and resolved the earlier
+native-link finding alpine-code-1. Environment isolation is the accepted bounded
+correction; no package versions are changed to conceal the collision.
+
+The pinned native Makefile is available as validation evidence at
+/tmp/alpine-gpio-isolation/Makefile, SHA-256
+e1843b4ddb1cb86134b80f3790189c7c6ca3a7cd6e94f9d9c657e3871d6db9e6,
+extracted from the already hash-verified A2 archive. Explorer alpine-ir-static returned the exact emitter 1.0.1 wheel at
+/tmp/alpine-gpio-isolation/rpi_groove_ir_emitter-1.0.1-py3-none-any.whl,
+SHA-256 850397b07849ec3cdb0450e9827ec2cbd540ae5a415777acb2552a5f5b30e6b6.
+Its metadata requires Jetson.GPIO and pigpio. Static __main__.py inspection
+confirms argparse runs before pigpio.pi() and does not import RPi.GPIO.
+Disposable /tmp environment evidence confirms default IR python, shade CLI
+path/shebang and hardware-free emitter --help. Jetson.GPIO 2.1.13 installs
+the conflicting RPi/GPIO namespace; the exact shade entry point generates a
+script naming its own venv interpreter. These preflight results do not prove
+a complete image or ARM runtime. The earlier interrupted assignment was
+reconciled: no container command remains running. Full image and final-user
+checks remain required; failure is never inferred away from environment names.
+
+### Ownership, assurance and trace
+
+P1 developer owns Dockerfile only for this consolidated correction. Parent owns
+PLAN. No source/API/event, environment-variable command, entrypoint, platform or
+workflow changes; docker/.env keeps A1 defaults. P2 rebuilds the full AMD64 image
+and executes the preserved version/import/metadata/consistency/help checks after
+cleanup, as node, with no devices or operational profiles. Independent code
+review covers the whole isolation/dependency/command-resolution boundary and
+verified carry-forward criteria; final QA follows, then P4 documentation writer
+once. Repeat is justified by a confirmed required-build/consumer incompatibility;
+benefit is preserving both consumers, impact is two small isolated environments.
+SPEC §§2, 3, 5, 6 and 7 map to these runtime/command and preservation checks; §8
+maps to README/AGENTS explanations of the two environments and actual evidence.
+
+Mandatory independent readiness reviews this complete effective PLAN before
+approval/dispatch. Architect trigger remains absent: independent device domains
+share packaging but no business rules interact. Contract/security reviewer
+triggers remain absent under current instructions. A1/A2 ownership, source
+provenance, library cleanup, target-platform/live criteria, delivery branch/PR,
+bounded assignments and no-publication/deployment/actuation boundaries persist.
+
+### Preserved behavior and impact
+
+Keep Node 19.2.0 / Alpine 3.16, packaged Python >=3.10, checksum-verified native
+lgpio, exact shade/emitter releases, both ARM targets, all HTTP/service behavior,
+trusted operator configuration, default fan command form and shade CLI arguments.
+No caller data enters shell commands and no profile or device provisioning is
+added. CPython compilation stays removed. Source/runtime evidence is distinct
+from the still-required ARM/Pi qualification.
+
+### Approval record
+
+Independent alpine-ready-A3 reviewed the complete effective pair at PLAN SHA-256
+fd2470529e9deceb40e32d47d6d921546cafbced8a77a1d5a1f907e728f88614
+and reported no readiness findings. Parent verified the handoff and automatically
+approves PLAN-backyard-shade-api-A3 and the complete effective PLAN through A3
+on 2026-11-13 under the originating implement request, the user's Alpine
+replacement instruction and accepted correction of alpine-code-A2-1. Approval
+covers dependency isolation, preserved executable contracts and final runtime
+checks; no manual review of this generated amendment is claimed. SPEC is
+unaffected. Actual image checks, code review, QA and delivery remain required.
+
+## Amendment 4 — 2026-11-13 — Writable notification-check directory
+
+- Amendment ID: PLAN-backyard-shade-api-A4
+- Previous version: Approved original through A3.
+- Approval: Automatically approved on 2026-11-13 after independent readiness assurance; prior content/status are preserved.
+- Request and purpose: Correct the last observed build-check environment under
+  the same implementation/Alpine request. SPEC is unaffected.
+
+### Changes against the previous version
+
+| Section / requirement | Before | After | Reason |
+| --- | --- | --- | --- |
+| A3 post-cleanup node checks | Execute unchanged import/metadata/pip/help checks with cwd /app, owned by root. | Create one private temporary directory as node using mktemp -d /tmp/shade-check.XXXXXX, cd into it, execute the identical checks as node with final PATH, then return to /app and remove only that captured temporary directory. Keep final Docker WORKDIR /app, runtime user and operator profile permissions unchanged. | Actual isolated build and independent alpine-code-A3-1 review show lgpio creates its notification FIFO in cwd; node cannot write /app. |
+| P4 operational guidance | Writable profile parent described. | Also state that SHADE_SCRIPT_DIR must be writable by the runtime user and support notification FIFO creation; existing /app/state example satisfies the intended local Docker-volume setup, subject to Pi qualification. Never repair/chown an operator profile to pass validation. | Native dependency's cwd prerequisite must be explicit and qualified. |
+
+### Evidence, preservation and assurance
+
+The A3 image now uses the correct shade RPi.GPIO namespace, resolving
+alpine-code-A2-1. Actual /tmp/shade-alpine316-build-isolated.log lines 292-301
+show lgpio trying /app/.lgd-nfy0 and then failing to open its callback FIFO.
+Independent alpine-code-A3 confirmed the high build-check finding. The accepted
+correction changes only the check's writable temporary cwd, keeping all imports,
+metadata assertions, interpreter paths, node identity, dependency checks and CLI
+help commands. It grants no device access or elevated runtime permissions and
+performs no RF command. Any resulting FIFO files are confined to and removed
+with that private build-check directory. A successful full image build and QA
+must establish equivalence; do not weaken or skip an import to obtain success.
+
+P1 developer owns Dockerfile only; parent owns PLAN. P2 rebuilds the complete
+local AMD64 image; code review and independent final QA cover the final directory,
+cleanup and preserved isolation/native/provenance boundary. P4 writer runs once
+after QA, including the cwd prerequisite and actual validation boundary. The
+confirmed required-build failure justifies this focused correction cycle; benefit
+is valid non-root runtime verification and impact is a disposable check directory.
+Mandatory readiness reviews the complete effective PLAN before approval. No
+interacting domain rules, API/event change or explicit security-review request:
+architect/contract/security triggers remain absent. All earlier platform/live,
+branch/PR/delivery, deadline, no-test and no-live-effect boundaries persist.
+Trace: SPEC §6 package/runtime-user and §7 validation -> P1/P2/code/QA; §8 -> P4.
+
+### Approval record
+
+Independent alpine-ready-A4 reviewed the complete effective pair at PLAN SHA-256
+14bb423fe626a56b857a8ca1f6d44f2b03474a16eb806fa4b0a73c69935d51ac
+and reported no readiness findings. Parent verified the handoff and automatically
+approves PLAN-backyard-shade-api-A4 and the complete effective PLAN through A4
+on 2026-11-13 under the originating implement request and accepted correction
+of alpine-code-A3-1. This approves the validation cwd/cleanup and documentation
+delta without manual user-review claims or waiving any ARM/Pi criterion. SPEC
+is unaffected; actual build, code review, QA and delivery evidence follow.
+
+## Amendment 5 — 2026-11-13 — Check-scoped board metadata
+
+- Amendment ID: PLAN-backyard-shade-api-A5
+- Previous version: Approved original through A4.
+- Approval: Automatically approved on 2026-11-13 after independent readiness assurance; earlier content/status are preserved.
+- Request and purpose: Correct the confirmed hardware-free build-check guard
+  under the originating implementation and Alpine replacement request. SPEC is
+  unchanged; actual board/device qualification remains mandatory.
+
+### Changes against the previous version
+
+| Section / requirement | Before | After | Reason |
+| --- | --- | --- | --- |
+| A4 shade import and shade CLI-help checks | Imports run as node from writable temporary cwd with no Pi metadata on the builder. | Supply RPI_LGPIO_REVISION=9000c1 only on each shade import/help command via su-exec node env. Retain every import/assertion and all no-device/no-RF checks. Label this supplied metadata as simulated Pi Zero W identification. Never put this value in Docker ENV, runtime defaults, wrappers or API configuration. | Actual A4 build passes FIFO setup but rpi-lgpio's board-identification guard raises without /proc/device-tree; independent alpine-code-A4-1 confirms the failure. |
+| P4 validation/operation guidance | Working-directory and actual Pi criteria. | Explain the check-scoped override and its limits; runtime must discover the real board or receive operator-provided actual-board metadata per upstream guidance, separately qualified on target. No fabricated identity is shipped as a runtime default. | Distinguish dependency-loading evidence from actual board/architecture/device evidence. |
+
+### Evidence and equivalence
+
+Explorer alpine-board-check verified upstream rpi-lgpio's supported
+RPI_LGPIO_REVISION variable in
+https://rpi-lgpio.readthedocs.io/en/latest/differences.html and the 0.6 source
+https://rpi-lgpio.readthedocs.io/en/latest/_modules/RPi/GPIO.html (_get_rpi_info).
+The implementation reads the variable before /proc/device-tree/system/linux,revision.
+Raspberry Pi's official revision table identifies 9000c1 as Zero W 1.1, 512 MB:
+https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#new-style-revision-codes.
+This is a supported metadata input, not replacement packages or hardware devices.
+All real dependency modules/native libraries must still load as node after tool
+removal, both pip checks must pass, and real CLI entry points must run --help.
+These checks prove dependency loading with supplied metadata only. They do not
+prove real board identification, ARM execution, GPIO/SPI access or RF behavior.
+Do not remove, mock or suppress an import or claim target-Pi success.
+
+### Ownership, trace, assurance and preservation
+
+P1 developer owns Dockerfile only for the check-scoped command prefixes and an
+explanatory comment/output. Parent owns PLAN. Rebuild complete local image,
+independently review the final scope/absence of persistent override, then run
+final QA and the once-only documentation writer as planned. A qualifying cycle
+is justified by the confirmed required-build failure; impact is explicit
+metadata for checks and benefit is valid hardware-free module loading. Mandatory
+readiness reviews the complete effective PLAN before approval. Current absent
+architect/contract/security triggers, branch/PR/commit/push/cleanup procedure,
+deadlines and no-test/no-live-effect rules are unchanged. Trace: SPEC §6 runtime
+imports and §7 evidence separation -> P1/P2/review/QA; §8 -> README/AGENTS.
+
+All A1-A4 production behavior, native/provenance checks, isolated environments,
+working-directory constraints, platforms, user and live acceptance requirements
+are preserved. No new runtime board setting, application code or profile/device
+operation is authorized by this validation correction.
+
+### Approval record
+
+Independent alpine-ready-A5 reviewed the complete effective pair at PLAN SHA-256
+c70589baa6f5e74156d8731c763afb9f27734aa6965e46dcbab016bb6f65365d
+and reported no readiness findings. Parent verified the handoff and automatically
+approves PLAN-backyard-shade-api-A5 and the complete effective PLAN through A5
+on 2026-11-13 under the originating implement request, user's Alpine replacement
+instruction and correction of alpine-code-A4-1. Approval covers check-only board
+metadata with unchanged import criteria and no persistent runtime override. All
+ARM/live criteria remain required; no manual review or hardware acceptance is
+implied. Code/QA/image/delivery evidence remains required.
+
+### Implementation evidence — 2026-11-13
+
+Code review alpine-code-A5 and final independent QA alpine-QA covered the effective
+PLAN at file SHA-256 1c5b3094c44d9a193ed3fbaa719657bd91a3cfb03ecc1b08a527fc29089da571
+before this factual receipt was appended; no requirements or approval scope are
+changed by this receipt. All supported findings are resolved: missing native
+library (alpine-code-1), shared GPIO namespace (alpine-code-A2-1), writable check
+cwd (alpine-code-A3-1), and check-only board identification (alpine-code-A4-1).
+Both final assignments returned complete with no actionable findings.
+
+The full local AMD64 image build passed and loaded image
+sha256:f6a9073d621da89f75cf2cfb29899337d610b8508e73aad24c05f653d88902fd.
+Alpine Python 3.10.14 loaded shade 1.0.0b2 and IR emitter 1.0.1 as node after
+compiler removal; both pip checks and all three CLI-help forms passed. QA ran the
+loaded immutable image with read-only root, network disabled, private writable
+tmpfs, no device/profile mounts, and check-scoped supplied metadata. Environment,
+module locations, namespace separation and cleanup passed; no runtime board
+revision override is present. The expected writable-cwd condition and a harmless
+pip-cache warning require no additional correction. Fresh npm ci/build/lint,
+existing five test files, shell syntax and parent diff checks passed. No tests
+were added or changed. These are dependency-loading/source checks, not ARM or Pi
+acceptance: both target-image/runtime and authorized live criteria remain pending.
+The build log is /tmp/shade-alpine316-build-qualified.log (SHA-256
+c34bb1b554a92ba0c6bb8ae240d6f4ca5d17b678b051e4eb5c18a12299c0ef2b).

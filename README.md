@@ -94,8 +94,10 @@ unconfirmed cleanup quarantines further shade sends until process restart.
 Provision the paired profile yourself. Mount its parent directory persistently
 and writable by the runtime user so the package can write a sibling temporary
 file and rename it. The API does not create, initialize, repair, or chown the
-profile. Provision SPI/GPIO mappings and device permissions, including required
-supplemental groups, for the runtime user; do not grant blanket privileged
+profile. `SHADE_SCRIPT_DIR` must be writable by `node` and support creation of
+the lgpio notification FIFO; the image's `/app/state` directory is prepared for
+that purpose. Provision SPI/GPIO mappings and device permissions, including
+required supplemental groups, for the runtime user; do not grant blanket privileged
 container access.
 
 ## Prerequisites
@@ -190,16 +192,31 @@ The emitter install uses Forgejo as its primary package index and public PyPI as
 an additional index. This keeps the emitter distribution sourced from Forgejo
 while allowing pip to resolve its declared third-party dependencies.
 
-The shade runtime uses checksum-verified CPython 3.11.18 installed under
-`/opt/python` in isolation, used for the emitter and shade dependencies. The Dockerfile
-pins `rpi-cc1101-transciever==1.0.0b2`, verifies its wheel SHA-256, and installs
-its dependencies from public PyPI (`cc1101==3.0.0`, `rpi-lgpio`, and `spidev`)
-before installing the distribution from the Forgejo-only project index; it
-runs `pip check` and runtime-user CLI checks. `docker/build.sh` forwards
-`SHADE_PACKAGE_NAME` and `SHADE_PACKAGE_VERSION` build arguments. Defaults are
-the reviewed release; unsupported overrides fail until the package metadata,
-release contract and checksum are reviewed and updated. Keep the existing IR
-emitter install, base image and supported platform configuration intact.
+The runtime image uses the Node 19.2.0 Alpine 3.16 base and its Python 3.10.14.
+The shade package runs in an isolated `/opt/shade-venv`; the existing IR emitter
+and fan commands use `/opt/ir-venv`. PATH selects the emitter venv's `python3`
+first and the shade CLI's own entry point from `/opt/shade-venv`, whose shebang
+keeps its dependencies isolated from the emitter's GPIO provider. Native lgpio
+0.2.2 is built from the upstream `v0.2.2` source archive (SHA-256
+`b08d8569d6dc8fa91a42ba1e37f620fdcb19d6bf2330e4b7d7301431ddbe124c`), and its
+runtime shared library is retained after build tools and source are removed;
+the shade venv installs Python binding `lgpio==0.2.2.0`. The existing
+`rpi-groove-ir-emitter==1.0.1` install remains in the IR venv, so fan commands
+continue to use `python3 -m ir_emitter <pulse-file>`.
+The Dockerfile pins `rpi-cc1101-transciever==1.0.0b2`, verifies its wheel
+SHA-256, installs dependencies from public PyPI and the distribution from the
+Forgejo-only project index, then runs `pip check` and runtime-user import/CLI
+checks. `docker/build.sh` forwards `SHADE_PACKAGE_NAME` and
+`SHADE_PACKAGE_VERSION` build arguments. Unsupported overrides fail until the
+package metadata, release contract and checksum are reviewed. Keep the existing
+IR emitter and supported platform configuration intact.
+
+Hardware-free shade import/help checks set `RPI_LGPIO_REVISION=9000c1` only on
+those check commands to simulate Pi Zero W identification. This is not a
+runtime default or evidence of real board discovery. On the target, qualify
+actual board identification or supply the operator's real board metadata as
+supported by [rpi-lgpio](https://rpi-lgpio.readthedocs.io/en/latest/differences.html),
+along with SPI/GPIO access and permissions.
 
 Container startup does not publish images or actuate hardware. The shade
 profile and parent directory must be operator-provisioned and mounted writable;
@@ -207,10 +224,10 @@ operator device mappings and supplemental groups must match the host's SPI/GPIO
 setup. Do not use multiple API replicas or concurrent CLI/capture users for one
 transmitter/profile.
 
-Local defaults from `docker/.env` remain:
+Build defaults from `docker/.env`:
 
-- `BASE_IMAGE_VERSION=19.2.0-alpine3.15`
-- `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.15`
+- `BASE_IMAGE_VERSION=19.2.0-alpine3.16`
+- `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.16`
 - Build options `--debug`, `--platform`, `--push`, `--force`, and `--release` are still supported.
 - Running from repository root still works with:
   ```bash
@@ -219,8 +236,8 @@ Local defaults from `docker/.env` remain:
 
 ### Publication-ready image tags
 
-- Release: `forgejo.alexlab.nl/alexlab/device-integration-api:<TAG>-node19.2.0-alpine3.15`
-- Rolling: `forgejo.alexlab.nl/alexlab/device-integration-api:latest-node19.2.0-alpine3.15`
+- Release: `forgejo.alexlab.nl/alexlab/device-integration-api:<TAG>-node19.2.0-alpine3.16`
+- Rolling: `forgejo.alexlab.nl/alexlab/device-integration-api:latest-node19.2.0-alpine3.16`
 
 `<TAG>` is the Git tag name. The image source is the repository checkout made
 by GitHub Actions for that tag event.
@@ -297,16 +314,20 @@ with one Buildx invocation using:
 
 ## Validation boundaries
 
-For the backyard shade integration, local build/lint, the existing five tests,
-manual harmless HTTP/process checks and final QA passed. The Docker placeholder
-guard rejected a placeholder override in a local AMD64 build. A separate check
-in the approved Alpine base verified the needed-library-only `scanelf` format. Final
-image/package checks for both `linux/arm64` and `linux/arm/v6` remain blocked by
-the local OCI exporter and lack of ARM emulation. Pi/device access, the
-operator-provisioned profile and persistence, live CLI duration under the
-five-second limit, and physical Up/Down/My behavior remain pending. This change
-is therefore DRAFT; no image publication, deployment, or RF actuation is
-authorized or evidenced.
+For the backyard shade integration, local `npm ci`, build, lint, the existing
+five tests, shell syntax checks and final QA passed. Earlier harmless
+HTTP/process checks cover the unchanged API source. The complete AMD64 image
+build passed with both isolated Python environments, imports and CLI help as
+`node`, both `pip check` runs, and native tool/source cleanup. Its
+hardware-free shade checks supplied simulated `RPI_LGPIO_REVISION=9000c1` only
+to shade import/help commands. They prove dependency loading under that
+supplied metadata, not target-board discovery, ARM execution, GPIO/SPI access
+or RF behavior. The base image manifest includes ARM64 and ARMv6, and Alpine
+armhf supplies Python 3.10.14. This local builder supports AMD64/386; final
+ARM64 and ARMv6 image builds and runtime checks remain pending. Pi/device
+access, profile persistence, live CLI duration under the five-second limit and
+physical Up/Down/My behavior also remain pending. Delivery is DRAFT; no image
+publication, deployment or RF actuation is authorized or evidenced.
 
 - Local/CI behavior covered by scripts and workflow files above is deterministic.
 - Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.

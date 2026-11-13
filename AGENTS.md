@@ -109,19 +109,30 @@
   one-transmitter ownership boundary, with no replicas, external CLI sender, or
   concurrent receiver capture. The paired profile is operator-provisioned; its
   persistently mounted parent directory must be writable for sibling temporary
-  file creation and rename. Do not automatically initialize, repair, or chown
-  the profile. Provision only the SPI/GPIO mappings and supplemental groups
+  file creation and rename. `SHADE_SCRIPT_DIR` must also be writable by `node`
+  and support lgpio notification FIFO creation; the image prepares `/app/state`
+  for this purpose. Do not automatically initialize, repair, or chown the
+  profile. Provision only the SPI/GPIO mappings and supplemental groups
   required by the host, without blanket privileged access.
 - Runtime packaging pins the reviewed `rpi-cc1101-transciever==1.0.0b2` wheel by
-  checksum and installs dependencies from a separate public PyPI index. It uses
-  isolated, checksum-verified CPython 3.11.18 under `/opt/python`; preserve the
-  IR emitter, base image and supported platforms. Any package/version override
-  requires release metadata, CLI contract and hash review.
+  checksum and installs dependencies from separate public PyPI and Forgejo
+  indexes. The Node 19.2.0 Alpine 3.16 base provides Python 3.10.14. Shade and
+  IR use isolated `/opt/shade-venv` and `/opt/ir-venv` environments; native
+  lgpio 0.2.2 is built from a checksum-verified source archive and its runtime
+  library is retained; keep `rpi-groove-ir-emitter==1.0.1` in the isolated IR
+  environment and preserve the default fan invocation. Hardware-free shade
+  import/help checks supply simulated `RPI_LGPIO_REVISION=9000c1` only to those
+  commands. Never set it as a runtime
+  default or claim this proves board discovery. Preserve the IR emitter and
+  supported platforms. Package/version overrides require release metadata, CLI
+  contract and hash review.
 - Never infer hosted or hardware success from local source checks. Docker image
   builds, Forgejo pushes and manifests, ARM64/ARMv6 pulls and smoke tests,
   pigpiod connectivity, packaged IR emission, physical fan behavior, and
   persistent-volume operation require live validation.
 - Shade ARM64/ARMv6 final-image/package validation and live Pi/device/profile,
   persistence, bounded CLI duration and physical command behavior remain
-  separate evidence requirements. Local checks do not prove them; publication,
-  deployment and RF actuation need explicit authority.
+  separate evidence requirements. Hardware-free checks with supplied board
+  metadata prove dependency loading only, not board discovery or device access.
+  Local checks do not prove those outcomes; publication, deployment and RF
+  actuation need explicit authority.
