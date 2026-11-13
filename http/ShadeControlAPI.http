@@ -1,0 +1,21 @@
+### Send backyard shade Up (close). Requires SHADE_ENABLED=true.
+### Empty 202 acknowledges transmitter process completion, not physical movement.
+POST {{host}}/api/v1/shades/backyard/up
+Accept: application/json
+
+###
+
+### Send backyard shade Down (open). Requires SHADE_ENABLED=true.
+POST {{host}}/api/v1/shades/backyard/down
+Accept: application/json
+
+###
+
+### Send backyard shade My (stop). Requires SHADE_ENABLED=true.
+POST {{host}}/api/v1/shades/backyard/my
+Accept: application/json
+
+###
+
+### 409 means a send is active or cleanup is uncertain; 500 may follow RF emission.
+### Do not automatically retry failed shade commands.

@@ -30,7 +30,7 @@ Device Integration API is a Node.js server project written in TypeScript that pr
 
 ## Architecture and Spec Workflow
 
-- Source modules are separated under `src` by package (`common`, `fan`, and future device packages).
+- Source modules are separated under `src` by package (`common`, `fan`, `shades`, and future device packages).
 - All implementation changes are spec-driven and must be approved before coding.
 - Active change specifications are stored under `specs/` while work is in
   progress. Completed artifacts may be removed after their durable behavior is
@@ -60,6 +60,45 @@ Device Integration API is a Node.js server project written in TypeScript that pr
   `FAN_STANDBY_TIMEOUT_MS`, eligible stop/rotate/speed operations first issue
   the configured start command as a wake-up pulse. The first command after
   process startup has no prior timestamp and does not synthesize a wake-up.
+
+### Backyard shade commands
+
+When `SHADE_ENABLED=true`, the API registers three bodyless POST commands:
+`/api/v1/shades/backyard/up` sends `up` (close), `/down` sends `down` (open),
+and `/my` sends `my` (stop). An empty `202` means the local transmitter process
+completed; it does not confirm RF reception, movement, or final position. A
+sanitized `500` means execution failed or timed out, but RF may already have
+been emitted and the rolling code may have advanced. Do not retry automatically
+or restore an earlier rolling code. Concurrent requests return `409`; if
+process cleanup cannot be confirmed, shade commands remain quarantined until
+the API process restarts.
+
+`SHADE_ENABLED` may be absent or `false` to disable the routes, or `true` to
+enable them; any other value fails startup. Enabled mode requires nonempty
+`SHADE_SCRIPT_DIR`, `SHADE_BASH_UP`, `SHADE_BASH_DOWN`, and `SHADE_BASH_MY`.
+Configure trusted full command strings, for example:
+
+```sh
+SHADE_ENABLED=true
+SHADE_SCRIPT_DIR=/app/state
+SHADE_BASH_UP='cc1101-transceiver emitter send --profile /app/state/backyard.json --command up'
+SHADE_BASH_DOWN='cc1101-transceiver emitter send --profile /app/state/backyard.json --command down'
+SHADE_BASH_MY='cc1101-transceiver emitter send --profile /app/state/backyard.json --command my'
+```
+
+Commands run through `/bin/sh` without a daemon or detach mode. The API permits
+one owning process for this transmitter/profile, with no replicas, external
+CLI caller, or concurrent receiver capture. Execution has a five-second limit,
+then bounded process-group cleanup (250 ms TERM grace and 750 ms confirmation);
+unconfirmed cleanup quarantines further shade sends until process restart.
+Provision the paired profile yourself. Mount its parent directory persistently
+and writable by the runtime user so the package can write a sibling temporary
+file and rename it. The API does not create, initialize, repair, or chown the
+profile. `SHADE_SCRIPT_DIR` must be writable by `node` and support creation of
+the lgpio notification FIFO; the image's `/app/state` directory is prepared for
+that purpose. Provision SPI/GPIO mappings and device permissions, including
+required supplemental groups, for the runtime user; do not grant blanket privileged
+container access.
 
 ## Prerequisites
 
@@ -153,10 +192,44 @@ The emitter install uses Forgejo as its primary package index and public PyPI as
 an additional index. This keeps the emitter distribution sourced from Forgejo
 while allowing pip to resolve its declared third-party dependencies.
 
-Local defaults from `docker/.env` remain:
+The runtime image uses the Node 19.2.0 Alpine 3.16 base and its Python 3.10.14.
+The shade package runs in an isolated `/opt/shade-venv`; the existing IR emitter
+and fan commands use `/opt/ir-venv`. PATH selects the emitter venv's `python3`
+first and the shade CLI's own entry point from `/opt/shade-venv`, whose shebang
+keeps its dependencies isolated from the emitter's GPIO provider. Native lgpio
+0.2.2 is built from the upstream `v0.2.2` source archive, and its runtime shared
+library is retained after build tools and source are removed; the shade venv
+installs Python binding `lgpio==0.2.2.0`. The existing
+`rpi-groove-ir-emitter==1.0.1` install remains in the IR venv, so fan commands
+continue to use `python3 -m ir_emitter <pulse-file>`.
+The Dockerfile installs `${SHADE_PACKAGE_NAME}==${SHADE_PACKAGE_VERSION}`
+directly with pip, using Forgejo as the primary index and public PyPI as the
+additional index so pip resolves the package and its declared dependencies.
+The build arguments default to `rpi-cc1101-transciever` and `1.0.0b2`; exported
+`SHADE_PACKAGE_NAME` and `SHADE_PACKAGE_VERSION` values can override them via
+`docker/build.sh`. These values select the build-time distribution and version;
+they are not runtime environment configuration. No separate package metadata,
+checksum, import, CLI, or dependency verification step is performed.
 
-- `BASE_IMAGE_VERSION=19.2.0-alpine3.15`
-- `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.15`
+Set any environment variables required by the installed shade package in the
+container runtime environment. The API process inherits them and passes its
+environment to the configured command. For Docker, provide them through an
+operator-managed env file, for example
+`docker run --env-file ./shade-runtime.env ...`; orchestration platforms can
+set the equivalent service environment. The image does not supply simulated
+board metadata or filter caller-provided environment variables. Qualify actual
+board discovery, SPI/GPIO access and permissions on the target.
+
+Container startup does not publish images or actuate hardware. The shade
+profile and parent directory must be operator-provisioned and mounted writable;
+operator device mappings and supplemental groups must match the host's SPI/GPIO
+setup. Do not use multiple API replicas or concurrent CLI/capture users for one
+transmitter/profile.
+
+Build defaults from `docker/.env`:
+
+- `BASE_IMAGE_VERSION=19.2.0-alpine3.16`
+- `BASE_BUILD_IMAGE_VERSION=19.2.0-alpine3.16`
 - Build options `--debug`, `--platform`, `--push`, `--force`, and `--release` are still supported.
 - Running from repository root still works with:
   ```bash
@@ -165,8 +238,8 @@ Local defaults from `docker/.env` remain:
 
 ### Publication-ready image tags
 
-- Release: `forgejo.alexlab.nl/alexlab/device-integration-api:<TAG>-node19.2.0-alpine3.15`
-- Rolling: `forgejo.alexlab.nl/alexlab/device-integration-api:latest-node19.2.0-alpine3.15`
+- Release: `forgejo.alexlab.nl/alexlab/device-integration-api:<TAG>-node19.2.0-alpine3.16`
+- Rolling: `forgejo.alexlab.nl/alexlab/device-integration-api:latest-node19.2.0-alpine3.16`
 
 `<TAG>` is the Git tag name. The image source is the repository checkout made
 by GitHub Actions for that tag event.
@@ -242,6 +315,20 @@ with one Buildx invocation using:
 ---
 
 ## Validation boundaries
+
+For the backyard shade integration, the installation-only AMD64 image build
+passed. Final QA exercised the actual API entrypoint and shade route in a
+disposable container with harmless commands and verified that caller-supplied
+`RPI_LGPIO_REVISION`, `RPI_LGPIO_CHIP` and `LG_WD` values reached a Node child
+unchanged. The route returned 202. This confirms environment delivery only; no
+shade package import, CLI invocation, metadata check, checksum check, `pip
+check`, or package verification was performed, as explicitly excluded by the
+user. Existing source checks and harmless HTTP/process checks cover the
+unchanged API implementation. CI continues to run lint and the existing tests.
+Final ARM64 and ARMv6 image builds, Pi/device access, profile persistence, live CLI duration
+under the five-second limit, and physical Up/Down/My behavior remain pending.
+Delivery is DRAFT; no image publication, deployment or RF actuation is
+authorized or evidenced.
 
 - Local/CI behavior covered by scripts and workflow files above is deterministic.
 - Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.
