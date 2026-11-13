@@ -762,3 +762,94 @@ were added or changed. These are dependency-loading/source checks, not ARM or Pi
 acceptance: both target-image/runtime and authorized live criteria remain pending.
 The build log is /tmp/shade-alpine316-build-qualified.log (SHA-256
 c34bb1b554a92ba0c6bb8ae240d6f4ca5d17b678b051e4eb5c18a12299c0ef2b).
+
+## Amendment 6 — 2026-11-13 — Direct installation and operator environment
+
+- Amendment ID: PLAN-backyard-shade-api-A6
+- Previous version: Approved original through A5 and its factual receipt.
+- Approval: Automatically approved on 2026-11-13 after independent readiness review of mechanics.
+- Request and authority: User explicitly instructs: “I would set the appropriate
+  variables, there is no need for a package verification. It should work as the
+  other package. Keep it simple, install the package and make sure env variables
+  which are required by the package reach the execution”. This directly excludes
+  package-verification activities from current execution/acceptance. No revised
+  SPEC or additional user approval is a precondition for this named exclusion;
+  preserve earlier approved artifacts and evidence unchanged above.
+
+### Changes and preserved scope
+
+| Requirement | Before | After / reason |
+| --- | --- | --- |
+| Package installation | Name/version regex and exact-release guards, separate shade wheel download/hash and --no-deps, explicit dependency list. | Direct quoted pip install of ${SHADE_PACKAGE_NAME}==${SHADE_PACKAGE_VERSION} with the same Forgejo primary / public PyPI extra-index approach as the fan; let pip install declared dependencies. Keep native-matching lgpio==0.2.2.0 alongside it. User owns supplied values; installation errors fail the build naturally. |
+| Verification | Checksums for source/wheel, version/metadata/import/assertion/path/shebang checks, pip check, CLI help, simulated RPI revision and check directory. | Remove these commands and do not run equivalent package verification elsewhere. Remove source checksum verification as part of the requested simple installation; retain versioned upstream URL and constrained native-library install. No simulated board identity is supplied. |
+| Runtime environment | Node spawn default environment inheritance; entrypoint exec. | Preserve generic inheritance unchanged: container runtime variables pass through exec/npm/Node/sh to the installed CLI. No allowlist, filtering, replacement environment or hardcoded board defaults. A harmless environment-only subprocess smoke check verifies representative caller-supplied values; no package import or command is used. |
+
+Retain Alpine 3.16 ARMv6/ARM64 base defaults, separate IR/shade venvs to prevent
+confirmed GPIO namespace collisions, default fan python3 command and shade CLI
+PATH, pinned pip/current package defaults, required native liblgpio source build
+and cleanup, node user, entrypoint and volumes. No HTTP/API/event/source behavior
+change is needed. Runtime package variables are supplied via docker -e/--env-file
+or deployment environment; build arguments configure installation only.
+
+### Units, validation and delivery
+
+- Developer S1 owns docker/Dockerfile only; remove verification and use direct
+  dependency-resolving installation. Do not change shade service/process source
+  unless mapping finds an actual environment drop; explorer simple-env found
+  none (spawn has no env override; entrypoint uses exec).
+- Parent runs shell/diff checks and a local AMD64 installation-only image build;
+  npm compilation occurs in its existing builder. No hash/import/metadata/help/
+  pip-check verification, real package invocation, board simulation, RF, device
+  or profile access. No new automated tests under domain-only policy.
+- Independent code review covers complete simplification and dependency/env
+  preservation, then final QA checks generic runtime-env delivery using a
+  harmless Node child command and temporary state, without package verification.
+- Documentation-writer after QA owns README.md and project-specific AGENTS.md:
+  direct install, operator-controlled build/runtime variables, natural env
+  inheritance and removed verification; keep native library/venv prerequisites
+  and honest remaining ARM/live evidence. Parent alone owns PLAN and Git.
+- Same PR #11 and branch origin/feature/backyard-shade-api, refreshed baseline
+  9bc807a5ef082c2270f58106e2851ab86f418865; attached worktree at the existing
+  /tmp/agent-worktrees/device-integration-api/backyard-shade-api. Non-force
+  commit/push, exact-head CI, verify remote/head/clean invoking main, retain
+  detached clean DRAFT checkpoint while still-required ARM/live evidence is
+  unavailable. No main merge, publication or deployment.
+
+Full profile retains independent code review, final QA and documentation writer.
+Readiness checks mechanics; no interacting business-domain rules, API/event
+change or explicit security-review request: other specialist triggers absent.
+Assignments aim three minutes, hard five-minute interruption, bounded JSON
+handoffs and no child Git authority. Trace: SPEC §6 installation/environment ->
+S1/build/env smoke; §7 package verification expressly excluded by user, other
+source/ARM/live outcomes retained; §8 -> README/AGENTS. No package-verification
+result will be claimed for this simplified image. Previous image checks remain
+historical and do not qualify this new installation. Actual Pi, ARM target image,
+persistence, device permissions and physical behavior remain unverified.
+
+### Approval record
+
+User exclusion applies immediately from the quoted instruction. Independent
+simple-ready reviewed the complete effective pair at PLAN file SHA-256
+0769dd9154b0cf196d073e2031733533cb75537c90971124909d1118adf43623
+and reported no readiness findings. Parent verified the handoff and automatically
+approves PLAN-backyard-shade-api-A6 and the complete effective PLAN through A6
+on 2026-11-13 under the originating implement request and explicit simplification
+instruction. No manual approval of generated prose is claimed and no SPEC rewrite
+is required for the excluded activity. Source/installation/env/review/QA/Git
+evidence still follows, without package-verification commands.
+
+### A6 execution evidence — 2026-11-13
+
+Independent simple-code and simple-QA completed without findings against the
+A6 effective PLAN file 17b3ebfc62678478092076650691106234b73aaf1bcc7faa7cd0b4f10463e3f2
+before this factual receipt. The installation-only local AMD64 build succeeded
+(image 8e1681a79a5f23042e782e42f237db216077be9fcf1d2f53cc1b71ef8df4f07c).
+No excluded package verification was executed. QA ran the actual application
+entrypoint/API shade route in a read-only, network-disabled disposable container
+with private tmpfs, harmless commands and no devices/profiles. Its Node child
+received all caller-supplied RPI_LGPIO_REVISION, RPI_LGPIO_CHIP and LG_WD sentinel
+values unchanged, and the route returned 202. This proves environment delivery,
+not package operation or physical behavior. Shell syntax and parent diff checks
+passed; no application/test files changed. Package verification is expressly
+omitted per the user; remaining ARM/live outcomes are still unverified. This
+receipt adds facts only and changes no approval scope or criteria.

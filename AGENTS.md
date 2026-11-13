@@ -114,25 +114,28 @@
   for this purpose. Do not automatically initialize, repair, or chown the
   profile. Provision only the SPI/GPIO mappings and supplemental groups
   required by the host, without blanket privileged access.
-- Runtime packaging pins the reviewed `rpi-cc1101-transciever==1.0.0b2` wheel by
-  checksum and installs dependencies from separate public PyPI and Forgejo
-  indexes. The Node 19.2.0 Alpine 3.16 base provides Python 3.10.14. Shade and
-  IR use isolated `/opt/shade-venv` and `/opt/ir-venv` environments; native
-  lgpio 0.2.2 is built from a checksum-verified source archive and its runtime
-  library is retained; keep `rpi-groove-ir-emitter==1.0.1` in the isolated IR
-  environment and preserve the default fan invocation. Hardware-free shade
-  import/help checks supply simulated `RPI_LGPIO_REVISION=9000c1` only to those
-  commands. Never set it as a runtime
-  default or claim this proves board discovery. Preserve the IR emitter and
-  supported platforms. Package/version overrides require release metadata, CLI
-  contract and hash review.
+- Runtime packaging uses the Node 19.2.0 Alpine 3.16 base and its Python
+  3.10.14. Shade and IR use isolated `/opt/shade-venv` and `/opt/ir-venv`
+  environments; native lgpio 0.2.2 is built from its versioned upstream source
+  and its runtime library is retained. Keep `rpi-groove-ir-emitter==1.0.1` in
+  the IR environment and preserve the default fan invocation. The shade
+  distribution and dependencies are installed directly with pip from Forgejo
+  primary and public PyPI additional indexes; there is no separate verification
+  step. `SHADE_PACKAGE_NAME` and `SHADE_PACKAGE_VERSION` are build-time
+  installation arguments and can be supplied by the operator. Do not treat
+  them as runtime package configuration.
+- Runtime environment variables supplied to the container are inherited by
+  the API and its configured shell command. Do not add an allowlist or filter;
+  package-specific variables remain operator-provided. Do not hardcode
+  simulated board metadata. Target board discovery and GPIO/SPI access require
+  separate qualification.
 - Never infer hosted or hardware success from local source checks. Docker image
   builds, Forgejo pushes and manifests, ARM64/ARMv6 pulls and smoke tests,
   pigpiod connectivity, packaged IR emission, physical fan behavior, and
   persistent-volume operation require live validation.
-- Shade ARM64/ARMv6 final-image/package validation and live Pi/device/profile,
+- Shade ARM64/ARMv6 final-image validation and live Pi/device/profile,
   persistence, bounded CLI duration and physical command behavior remain
-  separate evidence requirements. Hardware-free checks with supplied board
-  metadata prove dependency loading only, not board discovery or device access.
-  Local checks do not prove those outcomes; publication, deployment and RF
-  actuation need explicit authority.
+  separate evidence requirements. An environment-only smoke check proves only
+  that caller variables reach a child process; it does not qualify package
+  operation, board discovery or device access. Local checks do not prove those
+  outcomes; publication, deployment and RF actuation need explicit authority.

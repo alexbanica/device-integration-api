@@ -197,26 +197,28 @@ The shade package runs in an isolated `/opt/shade-venv`; the existing IR emitter
 and fan commands use `/opt/ir-venv`. PATH selects the emitter venv's `python3`
 first and the shade CLI's own entry point from `/opt/shade-venv`, whose shebang
 keeps its dependencies isolated from the emitter's GPIO provider. Native lgpio
-0.2.2 is built from the upstream `v0.2.2` source archive (SHA-256
-`b08d8569d6dc8fa91a42ba1e37f620fdcb19d6bf2330e4b7d7301431ddbe124c`), and its
-runtime shared library is retained after build tools and source are removed;
-the shade venv installs Python binding `lgpio==0.2.2.0`. The existing
+0.2.2 is built from the upstream `v0.2.2` source archive, and its runtime shared
+library is retained after build tools and source are removed; the shade venv
+installs Python binding `lgpio==0.2.2.0`. The existing
 `rpi-groove-ir-emitter==1.0.1` install remains in the IR venv, so fan commands
 continue to use `python3 -m ir_emitter <pulse-file>`.
-The Dockerfile pins `rpi-cc1101-transciever==1.0.0b2`, verifies its wheel
-SHA-256, installs dependencies from public PyPI and the distribution from the
-Forgejo-only project index, then runs `pip check` and runtime-user import/CLI
-checks. `docker/build.sh` forwards `SHADE_PACKAGE_NAME` and
-`SHADE_PACKAGE_VERSION` build arguments. Unsupported overrides fail until the
-package metadata, release contract and checksum are reviewed. Keep the existing
-IR emitter and supported platform configuration intact.
+The Dockerfile installs `${SHADE_PACKAGE_NAME}==${SHADE_PACKAGE_VERSION}`
+directly with pip, using Forgejo as the primary index and public PyPI as the
+additional index so pip resolves the package and its declared dependencies.
+The build arguments default to `rpi-cc1101-transciever` and `1.0.0b2`; exported
+`SHADE_PACKAGE_NAME` and `SHADE_PACKAGE_VERSION` values can override them via
+`docker/build.sh`. These values select the build-time distribution and version;
+they are not runtime environment configuration. No separate package metadata,
+checksum, import, CLI, or dependency verification step is performed.
 
-Hardware-free shade import/help checks set `RPI_LGPIO_REVISION=9000c1` only on
-those check commands to simulate Pi Zero W identification. This is not a
-runtime default or evidence of real board discovery. On the target, qualify
-actual board identification or supply the operator's real board metadata as
-supported by [rpi-lgpio](https://rpi-lgpio.readthedocs.io/en/latest/differences.html),
-along with SPI/GPIO access and permissions.
+Set any environment variables required by the installed shade package in the
+container runtime environment. The API process inherits them and passes its
+environment to the configured command. For Docker, provide them through an
+operator-managed env file, for example
+`docker run --env-file ./shade-runtime.env ...`; orchestration platforms can
+set the equivalent service environment. The image does not supply simulated
+board metadata or filter caller-provided environment variables. Qualify actual
+board discovery, SPI/GPIO access and permissions on the target.
 
 Container startup does not publish images or actuate hardware. The shade
 profile and parent directory must be operator-provisioned and mounted writable;
@@ -314,20 +316,19 @@ with one Buildx invocation using:
 
 ## Validation boundaries
 
-For the backyard shade integration, local `npm ci`, build, lint, the existing
-five tests, shell syntax checks and final QA passed. Earlier harmless
-HTTP/process checks cover the unchanged API source. The complete AMD64 image
-build passed with both isolated Python environments, imports and CLI help as
-`node`, both `pip check` runs, and native tool/source cleanup. Its
-hardware-free shade checks supplied simulated `RPI_LGPIO_REVISION=9000c1` only
-to shade import/help commands. They prove dependency loading under that
-supplied metadata, not target-board discovery, ARM execution, GPIO/SPI access
-or RF behavior. The base image manifest includes ARM64 and ARMv6, and Alpine
-armhf supplies Python 3.10.14. This local builder supports AMD64/386; final
-ARM64 and ARMv6 image builds and runtime checks remain pending. Pi/device
-access, profile persistence, live CLI duration under the five-second limit and
-physical Up/Down/My behavior also remain pending. Delivery is DRAFT; no image
-publication, deployment or RF actuation is authorized or evidenced.
+For the backyard shade integration, the installation-only AMD64 image build
+passed. Final QA exercised the actual API entrypoint and shade route in a
+disposable container with harmless commands and verified that caller-supplied
+`RPI_LGPIO_REVISION`, `RPI_LGPIO_CHIP` and `LG_WD` values reached a Node child
+unchanged. The route returned 202. This confirms environment delivery only; no
+shade package import, CLI invocation, metadata check, checksum check, `pip
+check`, or package verification was performed, as explicitly excluded by the
+user. Existing source checks and harmless HTTP/process checks cover the
+unchanged API implementation. CI continues to run lint and the existing tests.
+Final ARM64 and ARMv6 image builds, Pi/device access, profile persistence, live CLI duration
+under the five-second limit, and physical Up/Down/My behavior remain pending.
+Delivery is DRAFT; no image publication, deployment or RF actuation is
+authorized or evidenced.
 
 - Local/CI behavior covered by scripts and workflow files above is deterministic.
 - Live publish/runtime validation for `linux/arm64` and `linux/arm/v6` manifest inspection and actual image pull/run behavior requires trusted network access and ARMv6-capable host validation.
